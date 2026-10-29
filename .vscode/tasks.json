@@ -1,0 +1,32 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compile VOTUM",
+            "type": "shell",
+            "command": "./scripts/compile.sh",
+            "windows": {
+                "command": "scripts\\compile.bat"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$javac"]
+        },
+        {
+            "label": "Run Automated Tests",
+            "type": "shell",
+            "command": "./scripts/test.sh",
+            "windows": {
+                "command": "scripts\\test.bat"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": ["$javac"]
+        }
+    ]
+}
+

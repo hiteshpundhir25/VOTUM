@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOTUM — Project Master View</title>
+<style>
+  :root{
+    --noir-bg:#02060E; --noir-surface:#0B1018; --noir-elevated:#111722; --noir-input:#070B13;
+    --crimson:#C50337; --crimson-hover:#E0144C; --crimson-tint:#2A0812; --muted-crimson:#8F1537;
+    --border:#252B35; --text:#F5F5F7; --muted:#A8AFBA; --subtle:#64748B;
+    --success:#10B981; --success-bg:#062C1E; --warning:#F59E0B; --warning-bg:#2D1D03;
+    --danger:#EF4444; --danger-bg:#2C0A0E;
+    --mono:ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--noir-bg); color:var(--text);
+    font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px 72px}
+  header.top{
+    position:sticky;top:0;z-index:5;background:rgba(11,16,24,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);margin:0 -24px 32px;padding:16px 24px;
+  }
+  .brandrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .logo{font-size:26px;font-weight:800;letter-spacing:2px}
+  .kicker{color:var(--crimson);font-size:11px;font-weight:700;letter-spacing:1.4px}
+  .nav{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap}
+  .nav a{color:var(--muted);text-decoration:none;font-size:12px;font-weight:600;padding:6px 10px;border-radius:8px;border:1px solid transparent}
+  .nav a:hover{color:var(--text);background:var(--noir-elevated);border-color:var(--border)}
+  h1{font-size:22px;margin:0 0 6px}
+  h2{font-size:16px;margin:40px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);letter-spacing:.2px}
+  h2 .n{color:var(--crimson);font-family:var(--mono);font-size:13px;margin-right:8px}
+  h3{font-size:13px;margin:22px 0 8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+  p{margin:0 0 12px;color:var(--muted)}
+  a{color:var(--crimson-hover)}
+  .lead{color:var(--muted);max-width:70ch}
+  .card{background:var(--noir-surface);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin:14px 0}
+  .grid{display:grid;gap:14px}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+  .stat .k{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--muted)}
+  .stat .v{font-size:26px;font-weight:800;margin:6px 0 2px}
+  .stat .s{font-size:11px;color:var(--subtle)}
+  .pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.4px;border:1px solid transparent}
+  .p-ok{background:var(--success-bg);color:var(--success);border-color:#12503A}
+  .p-warn{background:var(--warning-bg);color:var(--warning);border-color:#4A3407}
+  .p-bad{background:var(--danger-bg);color:var(--danger);border-color:#57202A}
+  .p-crim{background:var(--crimson-tint);color:var(--crimson-hover);border-color:var(--muted-crimson)}
+  .p-neutral{background:var(--noir-elevated);color:var(--muted);border-color:var(--border)}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+  th{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);background:var(--noir-elevated)}
+  tbody tr:hover{background:#0E141E}
+  td.mono,code,pre{font-family:var(--mono)}
+  code{background:var(--noir-input);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:12px;color:#E6E8EC}
+  pre{background:var(--noir-input);border:1px solid var(--border);border-radius:12px;padding:14px 16px;overflow:auto;font-size:12.5px;color:#D8DCE2}
+  pre .c{color:var(--subtle)}
+  pre .k{color:var(--crimson-hover)}
+  .tree{white-space:pre;color:#D8DCE2}
+  .filters{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}
+  button.f{background:var(--noir-elevated);color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.5px}
+  button.f:hover{color:var(--text);border-color:var(--muted-crimson)}
+  button.f[aria-pressed="true"]{background:var(--crimson);color:#fff;border-color:var(--crimson-hover)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:760px){.two{grid-template-columns:1fr}}
+  ul{margin:6px 0 12px;padding-left:20px;color:var(--muted)}
+  li{margin:4px 0}
+  footer{margin-top:48px;border-top:1px solid var(--border);padding-top:16px;color:var(--subtle);font-size:12px}
+  .ok::before{content:"✓ ";color:var(--success);font-weight:800}
+  .dim{color:var(--subtle)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brandrow">
+    <div>
+      <div class="logo">VOTUM</div>
+      <div class="kicker">DIGITAL CAMPUS ELECTION MANAGEMENT SYSTEM</div>
+    </div>
+    <nav class="nav">
+      <a href="#status">Status</a>
+      <a href="#arch">Architecture</a>
+      <a href="#rules">Rules</a>
+      <a href="#bugs">Bug register</a>
+      <a href="#ux">UI/UX pass</a>
+      <a href="#iters">Iterations</a>
+      <a href="#run">Run it</a>
+      <a href="#accepted">Accepted</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>Project master view</h1>
+  <p class="lead">
+    A Java Swing desktop application with zero external dependencies: plain-text persistence, eight enforced
+    election business rules, a 24-point automated verification suite, and an administrator workflow that can
+    now create elections from the interface. This page is the static companion to <code>MASTER.md</code>,
+    the empty master blueprint of the project.
+  </p>
+  <div class="badges">
+    <span class="pill p-crim">28 Java classes</span>
+    <span class="pill p-ok">24 / 24 tests pass</span>
+    <span class="pill p-ok">30 / 30 UI smoke checks</span>
+    <span class="pill p-ok">13 / 13 experience checks</span>
+    <span class="pill p-ok">0 external dependencies</span>
+    <span class="pill p-neutral">JDK 17+ (verified on 26)</span>
+    <span class="pill p-warn">29 documented lint warnings</span>
+  </div>
+
+  <h2 id="status"><span class="n">01</span>Verification status</h2>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">COMPILE</div><div class="v" style="color:var(--success)">clean</div><div class="s">javac, 0 errors</div></div>
+    <div class="card stat"><div class="k">LINT</div><div class="v" style="color:var(--warning)">29</div><div class="s">27 [serial] + 2 [this-escape], documented</div></div>
+    <div class="card stat"><div class="k">TEST SUITE</div><div class="v" style="color:var(--success)">24 / 24</div><div class="s">exit code 0</div></div>
+    <div class="card stat"><div class="k">UI SMOKE</div><div class="v" style="color:var(--success)">30 / 30</div><div class="s">5 windows driven end to end</div></div>
+    <div class="card stat"><div class="k">EXPERIENCE SMOKE</div><div class="v" style="color:var(--success)">13 / 13</div><div class="s">banner, ballot gate, real vote, guidance</div></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Reproduce the evidence</h3>
+    <pre><span class="c"># compile</span>
+javac -d bin $(find src -name "*.java")
+
+<span class="c"># lint audit — expect 0 errors, 29 documented warnings</span>
+javac -Xlint:all -d /tmp/votum-lint $(find src -name "*.java")
+
+<span class="c"># behaviour suite — expect "24 Passed, 0 Failed"</span>
+java -cp bin com.votum.test.VotumTestSuite
+
+<span class="c"># architecture invariant — expect no output</span>
+grep -rn "fileManager.load\|new File(" src/com/votum/ui/
+
+<span class="c"># desktop application (run from the project root so data/ resolves)</span>
+java -cp bin com.votum.Main</pre>
+  </div>
+
+  <h2 id="arch"><span class="n">02</span>Architecture</h2>
+  <div class="two">
+    <div class="card">
+      <h3 style="margin-top:0">Package map</h3>
+      <div class="tree">src/com/votum/
+├── Main.java                  <span class="dim">composition root</span>
+├── model/      User · Admin · Voter · Candidate
+│               Election · ElectionStatus · Vote · ElectionResult
+├── exception/  VotumException ← 5 domain subclasses
+├── storage/    FileManager · AuditLogger
+├── service/    Authentication · Election · Voting · Result
+├── ui/         UITheme · LoginFrame · AdminDashboard
+│               VoterDashboard · ResultDialog · DateTimeInput
+└── test/       VotumTestSuite  <span class="dim">24 checks</span></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Dependency direction (enforced)</h3>
+      <pre>ui  ──▶  service  ──▶  storage  ──▶  model
+         └──────────────┴─────────────▶ exception</pre>
+      <ul>
+        <li><span class="ok">model</span> is I/O-free and Swing-free</li>
+        <li><span class="ok">storage</span> applies no business rules</li>
+        <li><span class="ok">service</span> owns every rule, imports no Swing</li>
+        <li><span class="ok">ui</span> calls services only — no file access (grep-verified)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2 id="rules"><span class="n">03</span>Business rules and where they are enforced</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th style="width:38px">#</th><th>Rule</th><th>Enforced in</th><th style="width:84px">Tests</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Only registered, eligible voters may vote</td><td class="mono">VotingService.castVoteAt</td><td class="mono">7, 21</td></tr>
+        <tr><td>2</td><td>One vote <strong>per voter per election</strong></td><td class="mono">VotingService + ballot records</td><td class="mono">8, 17</td></tr>
+        <tr><td>3</td><td>Voting only while the status is <code>OPEN</code></td><td class="mono">VotingService.castVoteAt</td><td class="mono">10, 11, 21</td></tr>
+        <tr><td>4</td><td>Voting before the start time is rejected</td><td class="mono">Election.isBeforeStart</td><td class="mono">10, 21</td></tr>
+        <tr><td>5</td><td>Voting after the end time is rejected</td><td class="mono">Election.isAfterEnd</td><td class="mono">11, 21</td></tr>
+        <tr><td>6</td><td>Candidate must be registered for that election</td><td class="mono">castVoteAt → roster</td><td class="mono">9</td></tr>
+        <tr><td>7</td><td>Only administrators configure elections</td><td class="mono">UI role routing</td><td class="mono">1, 3</td></tr>
+        <tr><td>8</td><td>Closed elections never accept ballots</td><td class="mono">castVoteAt</td><td class="mono">11</td></tr>
+      </tbody>
+    </table>
+    <p style="margin:8px 0 0"><strong>Window semantics:</strong> both bounds are inclusive — a ballot at exactly the
+    opening or closing instant is accepted; ±1 second outside is rejected.</p>
+  </div>
+
+  <h2 id="bugs"><span class="n">04</span>Bug register — 27 defects found and removed</h2>
+  <p class="lead">Every row was latent: the pre-existing suite passed 16/16 before any change. Filter to inspect.</p>
+  <div class="filters" id="filters">
+    <button class="f" data-sev="all" aria-pressed="true">All 27</button>
+    <button class="f" data-sev="Critical" aria-pressed="false">Critical (2)</button>
+    <button class="f" data-sev="High" aria-pressed="false">High (6)</button>
+    <button class="f" data-sev="Medium" aria-pressed="false">Medium (8)</button>
+    <button class="f" data-sev="Low" aria-pressed="false">Low (11)</button>
+  </div>
+  <div class="card" style="padding:10px 6px">
+    <table id="bugtable">
+      <thead><tr><th style="width:58px">ID</th><th style="width:78px">Severity</th><th>Defect</th><th>Fix</th><th style="width:74px">Verified</th></tr></thead>
+      <tbody>
+        <tr data-sev="Critical"><td class="mono">B-01</td><td><span class="pill p-bad">Critical</span></td><td>Single-vote rule was global: one ballot blocked every election, and the portal greyed out the wrong ballot.</td><td>Scope duplicate checks to <code>(voterId, electionId)</code> using ballot records as truth.</td><td class="mono">T17</td></tr>
+        <tr data-sev="Critical"><td class="mono">B-02</td><td><span class="pill p-bad">Critical</span></td><td>A failed ballot write still flagged the voter as voted — vote lost <em>and</em> voter blocked.</td><td>Writers return <code>boolean</code>; persist the ballot before touching the cache.</td><td class="mono">T7, T15</td></tr>
+        <tr data-sev="High"><td class="mono">B-03</td><td><span class="pill p-warn">High</span></td><td>A <code>;</code> inside a name or slogan shifted record columns and corrupted rows.</td><td><code>sanitize()</code> on every write (delimiter + CR/LF).</td><td class="mono">T19</td></tr>
+        <tr data-sev="High"><td class="mono">B-04</td><td><span class="pill p-warn">High</span></td><td>One corrupt line hid every record after it; the next write erased them.</td><td>Per-record skip-and-warn; parseable date + status required.</td><td class="mono">T19</td></tr>
+        <tr data-sev="High"><td class="mono">B-05</td><td><span class="pill p-warn">High</span></td><td>A student registering the username <code>admin</code> could never log in.</td><td><code>addVoter</code> rejects admin-owned usernames.</td><td class="mono">T18</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-06</td><td><span class="pill p-crim">Medium</span></td><td>Deleting <code>E001</code> also erased unrelated history such as <code>E0010</code>.</td><td>Whole-token, case-insensitive audit purge.</td><td class="mono">T20</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-07</td><td><span class="pill p-crim">Medium</span></td><td>Portal showed “READY TO VOTE” outside the window; <code>isCurrentlyActive</code> was dead code.</td><td>Single <code>canVote()</code> gate + 7-state badge machine.</td><td class="mono">T21</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-08</td><td><span class="pill p-crim">Medium</span></td><td>Every refresh reset the admin’s election selection; titles with brackets broke ID parsing.</td><td>Parallel ID lists, index resolution, selection restored by ID.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-09</td><td><span class="pill p-crim">Medium</span></td><td>Suggested IDs collided after deletion and mis-formatted past 9 records.</td><td><code>suggestNextId()</code> — highest suffix + 1, <code>%03d</code>.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Low"><td class="mono">B-10</td><td><span class="pill p-neutral">Low</span></td><td>The documented official result dialog could never be opened.</td><td>Results-panel button launches <code>ResultDialog</code>.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Low"><td class="mono">B-11</td><td><span class="pill p-neutral">Low</span></td><td><code>ElectionResult</code> leaked its mutable winner list; null lookups unsafe.</td><td>Unmodifiable copies + null-safe accessors.</td><td class="mono">T14</td></tr>
+        <tr data-sev="Low"><td class="mono">B-12</td><td><span class="pill p-neutral">Low</span></td><td>Persistence failures were invisible to callers.</td><td><code>boolean</code> returns + service-level failure exceptions.</td><td class="mono">T19</td></tr>
+        <tr data-sev="Low"><td class="mono">B-13</td><td><span class="pill p-neutral">Low</span></td><td><code>ui</code> read storage directly, contradicting the documented layering.</td><td><code>ElectionService.getAllCandidates()</code>; UI uses services only.</td><td class="mono">grep</td></tr>
+        <tr data-sev="Low"><td class="mono">B-14</td><td><span class="pill p-neutral">Low</span></td><td>47 <code>-Xlint:all</code> warnings (serial, non-final frames, unused resource, this-escape).</td><td>serialVersionUID, final leaf frames, explicit flush, private seeder.</td><td class="mono">lint</td></tr>
+        <tr data-sev="Low"><td class="mono">B-15</td><td><span class="pill p-neutral">Low</span></td><td>README claimed 15 tests, absolute <code>file:///Users/…</code> links, non-portable javac command.</td><td>README corrected to 24 tests, relative links, portable build.</td><td class="mono">docs</td></tr>
+        <tr data-sev="High"><td class="mono">B-16</td><td><span class="pill p-warn">High</span></td><td>All four dashboard metric cards displayed <code>0</code> forever — the overview contradicted the app's own data.</td><td><code>UITheme.StatCard</code> + <code>refreshDashboardMetrics()</code> rebinding live counts.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-17</td><td><span class="pill p-crim">Medium</span></td><td>Tall panels (election form especially) were clipped at the minimum window size with no way to scroll.</td><td><code>wrapContentScroll()</code> scroll-wraps every content panel.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-18</td><td><span class="pill p-crim">Medium</span></td><td>The whole type scale silently fell back where <code>Segoe UI</code> is absent (macOS/Linux).</td><td><code>UI_FONT_FAMILY</code> probes installed families via <code>GraphicsEnvironment</code>.</td><td class="mono">compile</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-19</td><td><span class="pill p-crim">Medium</span></td><td>Open / Close election fired on a single click — any misclick could start or end campus voting.</td><td>Confirmations that restate the window, plus already-open/closed guards.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Low"><td class="mono">B-20</td><td><span class="pill p-neutral">Low</span></td><td>Passive refreshes wrote a <code>Results generated</code> audit entry each time, drowning the real events.</td><td><code>previewResult()</code>: a silent tally for counters; the official call still audits.</td><td class="mono">T24</td></tr>
+        <tr data-sev="Low"><td class="mono">B-21</td><td><span class="pill p-neutral">Low</span></td><td>Rosters could not be searched, showed no row count, and rendered a blank grid when empty.</td><td>Per-keystroke <code>TableRowSorter</code> filter, live counts, distinct empty states.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Low"><td class="mono">B-22</td><td><span class="pill p-neutral">Low</span></td><td>Keyboard/accessibility gaps: no default button, no initial focus, <code>Esc</code> inert, labels unbound.</td><td>Root-pane default button, focus, <code>Alt+L</code>, <code>Esc</code> close, <code>labelFor</code> everywhere.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Low"><td class="mono">B-23</td><td><span class="pill p-neutral">Low</span></td><td>Audit entries read <code>Winner: Winner: Arjun Sharma</code> — the tally line labelled an outcome that was already labelled.</td><td>Append the outcome summary as-is; one label per line.</td><td class="mono">T24</td></tr>
+        <tr data-sev="High"><td class="mono">B-24</td><td><span class="pill p-warn">High</span></td><td>The admin badge read <code>● OPEN FOR VOTING</code> — and the inventory counted the election as open — for a window that had already elapsed, while the voter portal for the same record said <code>■ VOTING WINDOW ENDED</code>. Two halves of the app disagreed about whether voting was live.</td><td>Badge derives from the clock as well as the stored flag; a <em>Needs Your Attention</em> row offers <code>Close election</code>.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="High"><td class="mono">B-25</td><td><span class="pill p-warn">High</span></td><td>A rejected sign-in showed <em>no error at all</em>: the password was cleared after the message was shown, and the field's own change listener dismissed the banner.</td><td>Clear the rejected password first, then show the wrapped message.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Medium"><td class="mono">B-26</td><td><span class="pill p-crim">Medium</span></td><td><code>Submit Official Ballot</code> was enabled before anything was selected, so the screen's primary action was a dead end; success lived only in a modal and left no trace.</td><td>Selection-gated submit, one source of truth for button + hint, persistent <code>BALLOT RECORDED</code> receipt.</td><td class="mono">smoke</td></tr>
+        <tr data-sev="Low"><td class="mono">B-27</td><td><span class="pill p-neutral">Low</span></td><td>The credential card was pinned to a fixed height, so a wrapped two-line error had no room and would clip.</td><td>Card sized to its contents whenever the banner toggles.</td><td class="mono">smoke</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="ux"><span class="n">05</span>UI/UX pass &amp; election creation</h2>
+  <p class="lead">Three rounds of the iterative loop tackled presentation after the correctness work: a P0 defect pass, then the requested admin capability, then interaction polish — and finally an experience pass that walked the first-run flow and made the interface acknowledge its own actions.</p>
+  <div class="two">
+    <div class="card">
+      <h3 style="margin-top:0">Audit → outcome</h3>
+      <table>
+        <thead><tr><th style="width:56px">Prio</th><th>Finding</th><th>Outcome</th></tr></thead>
+        <tbody>
+          <tr><td><span class="pill p-bad">P0</span></td><td>Metric cards read <code>0</code> permanently</td><td>Card values rebound live (0 → 1 vote, 0.00% → 25.00%)</td></tr>
+          <tr><td><span class="pill p-bad">P0</span></td><td>Panels clipped at minimum size</td><td>All content panels scroll-wrapped</td></tr>
+          <tr><td><span class="pill p-bad">P0</span></td><td>Platform font fallback</td><td>Installed-family probe with candidate list</td></tr>
+          <tr><td><span class="pill p-crim">P1</span></td><td>No election creation in the UI</td><td>Create-election form wired to the existing service</td></tr>
+          <tr><td><span class="pill p-neutral">P2</span></td><td>One-click Open/Close</td><td>Confirmations + state guards</td></tr>
+          <tr><td><span class="pill p-neutral">P2</span></td><td>Unsearchable rosters</td><td>Live filter, row counts, empty states</td></tr>
+          <tr><td><span class="pill p-neutral">P2</span></td><td>No action feedback</td><td>Status line + election inventory line</td></tr>
+          <tr><td><span class="pill p-neutral">P2</span></td><td>Keyboard/a11y gaps</td><td>Default button, focus, <code>Esc</code>, <code>labelFor</code></td></tr>
+          <tr><td><span class="pill p-neutral">P2</span></td><td>No time context for voters</td><td>“Voting closes in 23h 40m” countdown</td></tr>
+          <tr><td><span class="pill p-warn">P3</span></td><td>Badge claimed OPEN for an elapsed window, contradicting the portal</td><td>Clock-aware badge + <em>Needs Your Attention</em> row with the fix</td></tr>
+          <tr><td><span class="pill p-warn">P3</span></td><td>A rejected sign-in showed no error at all</td><td>Banner shown after the field clears, wrapped and content-sized</td></tr>
+          <tr><td><span class="pill p-crim">P3</span></td><td>Ballot submit armed with nothing selected; success left no trace</td><td>Selection gates submit; persistent ballot receipt with vote ID</td></tr>
+          <tr><td><span class="pill p-neutral">P3</span></td><td>Admins had to hunt for what needed doing</td><td>Live attention card, each row naming the consequence and the fix</td></tr>
+          <tr><td><span class="pill p-neutral">P3</span></td><td>Sign-in gave no acknowledgement while it worked</td><td><code>SIGNING IN…</code> busy state, reveal toggle, Caps Lock hint</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Create election — flow</h3>
+      <pre>[Create New Election]  ID (auto E00n) · Title · Description
+                       · Starts · Ends · quick windows
+        │
+        ├─ inline validation (mirrors the service)
+        │    required · pattern yyyy-MM-dd HH:mm
+        │    · End strictly after Start · duplicate ID
+        ▼
+  ElectionService.createElection(...)   <span class="c">existing, unchanged</span>
+        │
+        ▼  DRAFT + audit entry
+  refresh ─▶ new election auto-selected
+        │     inventory + status line update
+        └─ “Open the voting window now?”
+             └▶ ElectionService.openElection(...)  <span class="c">existing</span></pre>
+      <p style="margin:10px 0 0"><strong>Compatibility:</strong> adds <code>ui/DateTimeInput</code> and one non-auditing
+      <code>ResultService.previewResult</code>; no model, storage-format or existing signature changed.</p>
+    </div>
+  </div>
+
+  <h2 id="iters"><span class="n">06</span>Refinement log</h2>
+  <div class="grid g2">
+    <div class="card"><div class="pill p-crim">Iteration 1</div><h3>Storage &amp; service correctness</h3>
+      <p>Removed B-01…B-06, B-11, B-12: per-election duplicate detection, ballot-before-flag ordering, delimiter
+      sanitization, fault-tolerant reads, token-scoped purge, unmodifiable result collections.</p>
+      <p class="dim">javac clean · suite 16/16 preserved</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 2</div><h3>UI correctness &amp; reachability</h3>
+      <p>Removed B-07…B-10: time-window ballot gate and badge machine, index-based selectors with preserved
+      selection, collision-free ID suggestions, official result dialog wired up.</p>
+      <p class="dim">javac clean · 16/16 · UI smoke 4/4 on the EDT</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 3</div><h3>Regression coverage</h3>
+      <p>Tests 17–21 added, one per defect class, plus <code>appendLine</code> / <code>containsToken</code> helpers
+      so no fixed defect can silently return.</p>
+      <p class="dim">suite 21/21 · exit code 0</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 4</div><h3>Layering, hygiene &amp; docs</h3>
+      <p>Removed B-13…B-15: UI reads via services, lint 47 → 27 (all documented), README aligned with measured
+      behaviour.</p>
+      <p class="dim">0 lint errors · 21/21 · layering grep empty</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 5</div><h3>P0 UI defects</h3>
+      <p>Removed B-16…B-18: metric cards rebound to live data, scroll-wrapped content, platform font probe.</p>
+      <p class="dim">21/21 preserved · smoke: cards bound 4 / 3 / 0 / 0.00%, then 1 / 25.00% after a ballot</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 6</div><h3>Admin election creation</h3>
+      <p>Create-election form over the existing service contract: auto ID, validated window, presets, inline
+      errors, DRAFT result, optional immediate open, auto-selection.</p>
+      <p class="dim">tests 22–23 · smoke: title refusal, window refusal, DRAFT persisted + selected</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 7</div><h3>Interaction polish</h3>
+      <p>Removed B-19…B-22: confirmations, non-auditing preview tally, roster filters with counts and empty
+      states, keyboard/accessibility wiring, voter countdown.</p>
+      <p class="dim">test 24 · smoke 30/30</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 8</div><h3>Re-review &amp; report</h3>
+      <p>Regression read-through of every diff, full protocol re-run, and the ≤2-page report in
+      <code>MASTER.md</code>.</p>
+      <p class="dim">24/24 · smoke 30/30 · lint 0 errors</p></div>
+    <div class="card"><div class="pill p-crim">Iteration 9</div><h3>Experience pass</h3>
+      <p>Removed B-24…B-27: the admin badge stopped claiming <code>OPEN FOR VOTING</code> outside the window;
+      the sign-in error is now actually visible; the ballot is gated on a selection and leaves a persistent
+      receipt; a live <em>Needs Your Attention</em> card names what to do next. Plus a busy state on sign-in,
+      a password reveal toggle and a Caps Lock hint.</p>
+      <p class="dim">24/24 · experience smoke 13/13 (a real vote cast through the real UI)</p></div>
+  </div>
+
+  <h2 id="run"><span class="n">07</span>Run the application</h2>
+  <div class="two">
+    <div class="card">
+      <h3 style="margin-top:0">Desktop app (macOS / Linux)</h3>
+      <pre>./compile.sh     <span class="c"># javac -d bin $(find src -name "*.java")</span>
+./run.sh         <span class="c"># launches the Swing GUI</span>
+./test.sh        <span class="c"># 24-point verification suite</span>
+
+<span class="c"># or manually, from the project root</span>
+java -cp bin com.votum.Main</pre>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Demo credentials</h3>
+      <table>
+        <thead><tr><th>Role</th><th>Username</th><th>Password</th><th>ID</th></tr></thead>
+        <tbody>
+          <tr><td>Admin</td><td class="mono">admin</td><td class="mono">admin123</td><td class="mono">ADM001</td></tr>
+          <tr><td>Voter</td><td class="mono">voter1…voter4</td><td class="mono">voter123</td><td class="mono">V001–V004</td></tr>
+          <tr><td>Voter (ineligible)</td><td class="mono">voter5</td><td class="mono">voter123</td><td class="mono">V005</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:8px 0 0" class="dim">The login screen has quick-fill buttons for a fast demo.</p>
+    </div>
+  </div>
+
+  <h2 id="accepted"><span class="n">08</span>Deliberate behaviour &amp; accepted warnings</h2>
+  <div class="two">
+    <div class="card">
+      <h3 style="margin-top:0">By design (not defects)</h3>
+      <ul>
+        <li>Plain-text credentials — the coursework brief forbids external libraries.</li>
+        <li>Official tallies audit a <code>Results generated</code> entry; live dashboard counters use the silent preview tally.</li>
+        <li>Demo data is reseeded whenever a store file is missing or empty.</li>
+        <li><code>data/</code> resolves against the working directory — launch from the project root.</li>
+        <li>Voter-roll status shows <code>VOTED (E002)</code>: one cached flag cannot encode several elections.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Residual lint warnings</h3>
+      <ul>
+        <li><strong>27 × [serial]</strong> — Swing frames hold service references and a row sorter; marking those
+        fields <code>transient</code> would create a real null-after-deserialization defect.</li>
+        <li><strong>2 × [this-escape]</strong> in <code>FileManager</code> — the constructor’s demo seeder calls a
+        public synchronized writer; making the class <code>final</code> would block the documented v2 storage subclass.</li>
+      </ul>
+    </div>
+  </div>
+
+  <footer>
+    VOTUM · master view generated from <code>MASTER.md</code> · 28 Java classes · JDK-only ·
+    verified 2026-09-14 (compile, lint 0 errors, 24/24 tests, 30/30 UI smoke checks, layering grep).
+  </footer>
+</div>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll('#filters button.f');
+    var rows = document.querySelectorAll('#bugtable tbody tr');
+    function apply(sev) {
+      rows.forEach(function (r) {
+        r.style.display = (sev === 'all' || r.getAttribute('data-sev') === sev) ? '' : 'none';
+      });
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.getAttribute('data-sev') === sev));
+      });
+    }
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { apply(b.getAttribute('data-sev')); });
+    });
+  })();
+</script>
+</body>
+</html>

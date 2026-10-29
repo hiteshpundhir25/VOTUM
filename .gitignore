@@ -1,0 +1,27 @@
+# Compiled Java Class Files
+*.class
+bin/
+build/
+out/
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and Editor Configuration
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+
+# Test Artifacts and Temporary Directories
+data_test/
+*.tmp
+*.bak
+.freebuff/

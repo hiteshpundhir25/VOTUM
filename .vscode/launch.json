@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run VOTUM (Desktop GUI)",
+            "request": "launch",
+            "mainClass": "com.votum.Main",
+            "projectName": "VOTUM",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "java",
+            "name": "Run Domain Verification Tests",
+            "request": "launch",
+            "mainClass": "com.votum.test.VotumTestSuite",
+            "projectName": "VOTUM",
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "java",
+            "name": "Run UI Smoke Tests",
+            "request": "launch",
+            "mainClass": "com.votum.test.UISmokeTestSuite",
+            "projectName": "VOTUM",
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
+
