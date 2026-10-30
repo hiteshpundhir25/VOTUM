@@ -104,19 +104,19 @@ public final class LoginFrame extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 0.52;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTH;
-        gbc.insets = new Insets(0, 0, 0, 20);
+        gbc.insets = new Insets(0, 0, 0, 24);
         body.add(buildBrandAndCivicShowcase(), gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.weightx = 0.48;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weighty = 0.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTH;
-        gbc.insets = new Insets(0, 20, 0, 0);
+        gbc.insets = new Insets(0, 24, 0, 0);
         body.add(buildSignInTerminal(), gbc);
 
         // CenteredPage (1260px) groups the left showcase and right card cleanly in the middle of any display
@@ -148,12 +148,10 @@ public final class LoginFrame extends JFrame {
         });
     }
 
-    /** Masthead, edition line and the double rule that opens the page. */
+    /** Masthead, edition line and the double rule that opens the page edge-to-edge. */
     private JPanel buildMasthead() {
-        JPanel block = new JPanel();
-        block.setLayout(new BoxLayout(block, BoxLayout.Y_AXIS));
+        JPanel block = new JPanel(new BorderLayout(0, 14));
         block.setBackground(UITheme.PAPER);
-        block.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel row = new JPanel(new BorderLayout(24, 0));
         row.setOpaque(false);
@@ -202,11 +200,16 @@ public final class LoginFrame extends JFrame {
         row.add(titleBlock, BorderLayout.WEST);
         row.add(meta, BorderLayout.EAST);
 
-        block.add(row);
-        block.add(Box.createVerticalStrut(14));
-        block.add(UITheme.createRule(2, UITheme.INK));
-        block.add(Box.createVerticalStrut(3));
-        block.add(UITheme.createRule(1, UITheme.RULE));
+        // Heavy masthead double rule: stretches 100% from under VOTUM all the way to the right
+        JPanel rulesPanel = new JPanel();
+        rulesPanel.setLayout(new BoxLayout(rulesPanel, BoxLayout.Y_AXIS));
+        rulesPanel.setOpaque(false);
+        rulesPanel.add(UITheme.createRule(2, UITheme.INK));
+        rulesPanel.add(Box.createVerticalStrut(3));
+        rulesPanel.add(UITheme.createRule(1, UITheme.RULE));
+
+        block.add(row, BorderLayout.CENTER);
+        block.add(rulesPanel, BorderLayout.SOUTH);
         return block;
     }
 
@@ -376,7 +379,7 @@ public final class LoginFrame extends JFrame {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(new CompoundBorder(
                 new LineBorder(UITheme.RULE, 1),
-                new EmptyBorder(26, 32, 26, 32)
+                new EmptyBorder(28, 32, 28, 32)
         ));
         card.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -405,10 +408,13 @@ public final class LoginFrame extends JFrame {
         card.add(UITheme.createRule(1, UITheme.RULE));
         card.add(Box.createVerticalStrut(14));
         card.add(buildDemoGrid());
-        card.add(Box.createVerticalStrut(12));
+        card.add(Box.createVerticalStrut(16));
 
         JPanel footnotePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
         footnotePanel.setOpaque(false);
+        footnotePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        footnotePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+
         JLabel footnote = new JLabel("🔒  Official registry verified  \u2022  Cryptographic audit stream");
         footnote.setFont(UITheme.FONT_SMALL);
         footnote.setForeground(UITheme.FAINT);
@@ -565,6 +571,7 @@ public final class LoginFrame extends JFrame {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 110));
 
         JLabel header = UITheme.createKicker("DEMO QUICK-FILL ACCESS (CLICK TO FILL)");
         header.setForeground(UITheme.MUTED);
