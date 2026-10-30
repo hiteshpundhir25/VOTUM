@@ -12,6 +12,7 @@ echo "Starting VOTUM — Campus Election System..."
 echo "=========================================="
 
 mkdir -p bin
+find src -name "*.class" -delete 2>/dev/null || true
 javac -d bin $(find src -name "*.java")
 
 if [ $? -eq 0 ]; then

@@ -9,6 +9,7 @@ echo Starting VOTUM — Campus Election System...
 echo ==========================================
 
 if not exist "bin" mkdir bin
+del /s /q src\*.class >nul 2>&1
 dir /s /B src\*.java > sources.txt
 javac -d bin @sources.txt
 set COMPILE_STATUS=%ERRORLEVEL%
