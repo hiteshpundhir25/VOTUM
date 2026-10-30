@@ -1318,7 +1318,10 @@ public final class AdminDashboard extends JFrame {
         logBtnRow.setOpaque(false);
 
         JButton refreshBtn = UITheme.createSecondaryButton("Refresh Logs");
-        JButton clearBtn = UITheme.createDangerButton("Clear Audit Logs");
+        JButton changePwdBtn = UITheme.createSecondaryButton("🔑 Change Audit Password");
+        changePwdBtn.setToolTipText("Change or configure the Audit Protection Password");
+        JButton clearBtn = UITheme.createDangerButton("🔒 Delete Audit Logs");
+        clearBtn.setToolTipText("Permanently delete audit logs (Protected by Audit Security Password)");
 
         refreshBtn.addActionListener(e -> {
             refreshAuditLogs();
@@ -1326,23 +1329,11 @@ public final class AdminDashboard extends JFrame {
             JOptionPane.showMessageDialog(this, "Audit logs refreshed.", "Refreshed", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        clearBtn.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(
-                    this,
-                    "Are you sure you want to permanently clear all audit logs?",
-                    "Confirm Clear Logs",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE
-            );
-            if (confirm == JOptionPane.YES_OPTION) {
-                auditLogger.clearAllLogs();
-                refreshAuditLogs();
-                setStatus("Audit log cleared");
-                JOptionPane.showMessageDialog(this, "Audit logs have been cleared.", "Cleared", JOptionPane.INFORMATION_MESSAGE);
-            }
-        });
+        changePwdBtn.addActionListener(e -> handleChangeAuditPassword());
+        clearBtn.addActionListener(e -> handleDeleteAuditLogs());
 
         logBtnRow.add(refreshBtn);
+        logBtnRow.add(changePwdBtn);
         logBtnRow.add(clearBtn);
 
         topRow.add(titleBox, BorderLayout.CENTER);
@@ -2068,6 +2059,424 @@ public final class AdminDashboard extends JFrame {
         }
         auditTextArea.setText(sb.toString());
         auditTextArea.setCaretPosition(0);
+    }
+
+    // =========================================================================
+    // AUDIT LOG DELETION SECURITY (OPTION 3: PASSWORD PROTECTED AUDIT DELETION)
+    // =========================================================================
+
+    private void handleDeleteAuditLogs() {
+        if (!fileManager.hasAuditProtectionPassword()) {
+            promptSetupAuditPasswordAndProceed();
+        } else {
+            promptVerifyAuditPasswordAndDelete();
+        }
+    }
+
+    private void promptSetupAuditPasswordAndProceed() {
+        JDialog dialog = new JDialog(this, "Set Audit Protection Password — First-Time Setup", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(UITheme.PAPER);
+        dialog.setResizable(false);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(UITheme.PAPER);
+        content.setBorder(new EmptyBorder(24, 28, 20, 28));
+
+        JLabel kicker = UITheme.createKicker("SECURITY CONFIGURATION \u00B7 FIRST-TIME SETUP");
+        kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel title = new JLabel("Protect System Audit Trail");
+        title.setFont(UITheme.FONT_HEADER);
+        title.setForeground(UITheme.INK);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel desc = new JLabel("<html><div style='width:420px; line-height:1.4; color:#52525B;'>"
+                + "Audit logs are tamper-evident institutional records. Before any logs can be deleted, "
+                + "you must establish an <b>Audit Protection Password</b>. This password will be required "
+                + "for all future log deletion attempts.</div></html>");
+        desc.setFont(UITheme.FONT_BODY);
+        desc.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel l1 = new JLabel("Create Audit Protection Password (min. 4 characters):");
+        l1.setFont(UITheme.FONT_SMALL_BOLD);
+        l1.setForeground(UITheme.MUTED);
+        l1.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPasswordField p1Field = UITheme.createPasswordField(20);
+        p1Field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        p1Field.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel l2 = new JLabel("Confirm Audit Protection Password:");
+        l2.setFont(UITheme.FONT_SMALL_BOLD);
+        l2.setForeground(UITheme.MUTED);
+        l2.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPasswordField p2Field = UITheme.createPasswordField(20);
+        p2Field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        p2Field.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel errLabel = new JLabel(" ");
+        errLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        errLabel.setForeground(UITheme.DANGER);
+        errLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        content.add(kicker);
+        content.add(Box.createVerticalStrut(4));
+        content.add(title);
+        content.add(Box.createVerticalStrut(8));
+        content.add(desc);
+        content.add(Box.createVerticalStrut(18));
+        content.add(l1);
+        content.add(Box.createVerticalStrut(6));
+        content.add(p1Field);
+        content.add(Box.createVerticalStrut(12));
+        content.add(l2);
+        content.add(Box.createVerticalStrut(6));
+        content.add(p2Field);
+        content.add(Box.createVerticalStrut(6));
+        content.add(errLabel);
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnRow.setBackground(UITheme.PAPER_ALT);
+        btnRow.setBorder(new CompoundBorder(
+                new MatteBorder(1, 0, 0, 0, UITheme.RULE),
+                new EmptyBorder(12, 28, 12, 28)
+        ));
+
+        JButton cancelBtn = UITheme.createSecondaryButton("Cancel");
+        JButton submitBtn = UITheme.createPrimaryButton("Set Password & Continue \u2192");
+
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        Runnable submitAction = () -> {
+            String pass1 = new String(p1Field.getPassword()).trim();
+            String pass2 = new String(p2Field.getPassword()).trim();
+
+            if (pass1.isEmpty() || pass1.length() < 4) {
+                errLabel.setText("\u26A0 Password must be at least 4 characters long.");
+                p1Field.requestFocusInWindow();
+                return;
+            }
+            if (!pass1.equals(pass2)) {
+                errLabel.setText("\u26A0 Passwords do not match. Please re-enter.");
+                p2Field.setText("");
+                p2Field.requestFocusInWindow();
+                return;
+            }
+
+            boolean ok = fileManager.setAuditProtectionPassword(pass1);
+            if (!ok) {
+                errLabel.setText("\u26A0 Failed to persist security configuration to disk.");
+                return;
+            }
+
+            auditLogger.log("Audit security configured", "Audit protection password set by Admin: " + admin.getUsername());
+            dialog.dispose();
+
+            int proceed = JOptionPane.showConfirmDialog(
+                    this,
+                    "Audit Protection Password has been successfully configured!\n\n" +
+                    "Do you want to proceed and permanently delete all current audit logs now?",
+                    "Confirm Delete Logs",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if (proceed == JOptionPane.YES_OPTION) {
+                auditLogger.clearAllLogs();
+                refreshAuditLogs();
+                setStatus("Audit logs permanently deleted");
+                JOptionPane.showMessageDialog(this, "All audit logs have been permanently deleted.", "Audit Logs Cleared", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                setStatus("Audit protection password configured; logs retained");
+                JOptionPane.showMessageDialog(this, "Audit protection password is now active. Your logs remain intact.", "Protected", JOptionPane.INFORMATION_MESSAGE);
+            }
+        };
+
+        submitBtn.addActionListener(e -> submitAction.run());
+        p1Field.addActionListener(e -> p2Field.requestFocusInWindow());
+        p2Field.addActionListener(e -> submitAction.run());
+
+        dialog.getRootPane().registerKeyboardAction(
+                e -> dialog.dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+
+        btnRow.add(cancelBtn);
+        btnRow.add(submitBtn);
+
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(btnRow, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        p1Field.requestFocusInWindow();
+        dialog.setVisible(true);
+    }
+
+    private void promptVerifyAuditPasswordAndDelete() {
+        JDialog dialog = new JDialog(this, "Authorize Audit Log Deletion", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(UITheme.PAPER);
+        dialog.setResizable(false);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(UITheme.PAPER);
+        content.setBorder(new EmptyBorder(24, 28, 20, 28));
+
+        JLabel kicker = UITheme.createKicker("RESTRICTED ACTION \u00B7 PASSWORD REQUIRED");
+        kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel title = new JLabel("Delete System Audit Trail");
+        title.setFont(UITheme.FONT_HEADER);
+        title.setForeground(UITheme.INK);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPanel warningBox = new JPanel(new BorderLayout());
+        warningBox.setBackground(UITheme.DANGER_TINT);
+        warningBox.setBorder(new CompoundBorder(
+                new MatteBorder(0, 3, 0, 0, UITheme.DANGER),
+                new EmptyBorder(10, 12, 10, 12)
+        ));
+        warningBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        warningBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+
+        JLabel warningLbl = new JLabel("<html><b>PERMANENT DESTRUCTION WARNING:</b><br>"
+                + "This action will permanently erase all administrative actions, ballot receipts, "
+                + "and event logs from disk. This cannot be undone.</html>");
+        warningLbl.setFont(UITheme.FONT_SMALL);
+        warningLbl.setForeground(UITheme.DANGER);
+        warningBox.add(warningLbl, BorderLayout.CENTER);
+
+        JLabel promptLbl = new JLabel("Enter Audit Protection Password to authorize deletion:");
+        promptLbl.setFont(UITheme.FONT_SMALL_BOLD);
+        promptLbl.setForeground(UITheme.MUTED);
+        promptLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPasswordField passField = UITheme.createPasswordField(20);
+        passField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        passField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel errLabel = new JLabel(" ");
+        errLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        errLabel.setForeground(UITheme.DANGER);
+        errLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        content.add(kicker);
+        content.add(Box.createVerticalStrut(4));
+        content.add(title);
+        content.add(Box.createVerticalStrut(10));
+        content.add(warningBox);
+        content.add(Box.createVerticalStrut(16));
+        content.add(promptLbl);
+        content.add(Box.createVerticalStrut(6));
+        content.add(passField);
+        content.add(Box.createVerticalStrut(6));
+        content.add(errLabel);
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnRow.setBackground(UITheme.PAPER_ALT);
+        btnRow.setBorder(new CompoundBorder(
+                new MatteBorder(1, 0, 0, 0, UITheme.RULE),
+                new EmptyBorder(12, 28, 12, 28)
+        ));
+
+        JButton cancelBtn = UITheme.createSecondaryButton("Cancel");
+        JButton deleteBtn = UITheme.createDangerButton("\uD83D\uDD12 Authorize & Delete Permanently");
+
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        Runnable authorizeAction = () -> {
+            String entered = new String(passField.getPassword()).trim();
+            if (entered.isEmpty()) {
+                errLabel.setText("\u26A0 Please enter the Audit Protection Password.");
+                passField.requestFocusInWindow();
+                return;
+            }
+
+            if (!fileManager.verifyAuditProtectionPassword(entered)) {
+                auditLogger.log("Audit delete authorization failed", "Invalid password attempt by Admin: " + admin.getUsername());
+                errLabel.setText("\u26A0 Access Denied: Incorrect password. Deletion blocked.");
+                setStatus("Audit log deletion rejected: invalid password");
+                passField.setText("");
+                passField.requestFocusInWindow();
+                return;
+            }
+
+            // Authorized!
+            dialog.dispose();
+            auditLogger.clearAllLogs();
+            refreshAuditLogs();
+            setStatus("Audit logs permanently deleted");
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Authorization successful.\nAll audit logs have been permanently deleted from disk.",
+                    "Audit Logs Deleted",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        };
+
+        deleteBtn.addActionListener(e -> authorizeAction.run());
+        passField.addActionListener(e -> authorizeAction.run());
+
+        dialog.getRootPane().registerKeyboardAction(
+                e -> dialog.dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+
+        btnRow.add(cancelBtn);
+        btnRow.add(deleteBtn);
+
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(btnRow, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        passField.requestFocusInWindow();
+        dialog.setVisible(true);
+    }
+
+    private void handleChangeAuditPassword() {
+        if (!fileManager.hasAuditProtectionPassword()) {
+            promptSetupAuditPasswordAndProceed();
+            return;
+        }
+
+        JDialog dialog = new JDialog(this, "Change Audit Protection Password", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(UITheme.PAPER);
+        dialog.setResizable(false);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(UITheme.PAPER);
+        content.setBorder(new EmptyBorder(24, 28, 20, 28));
+
+        JLabel kicker = UITheme.createKicker("SECURITY CONFIGURATION \u00B7 CREDENTIAL UPDATE");
+        kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel title = new JLabel("Update Audit Protection Password");
+        title.setFont(UITheme.FONT_HEADER);
+        title.setForeground(UITheme.INK);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel currLbl = new JLabel("Current Password:");
+        currLbl.setFont(UITheme.FONT_SMALL_BOLD);
+        currLbl.setForeground(UITheme.MUTED);
+        currLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPasswordField currField = UITheme.createPasswordField(20);
+        currField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        currField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel newLbl = new JLabel("New Password (min. 4 characters):");
+        newLbl.setFont(UITheme.FONT_SMALL_BOLD);
+        newLbl.setForeground(UITheme.MUTED);
+        newLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPasswordField newField = UITheme.createPasswordField(20);
+        newField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        newField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel confLbl = new JLabel("Confirm New Password:");
+        confLbl.setFont(UITheme.FONT_SMALL_BOLD);
+        confLbl.setForeground(UITheme.MUTED);
+        confLbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JPasswordField confField = UITheme.createPasswordField(20);
+        confField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        confField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel errLabel = new JLabel(" ");
+        errLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        errLabel.setForeground(UITheme.DANGER);
+        errLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        content.add(kicker);
+        content.add(Box.createVerticalStrut(4));
+        content.add(title);
+        content.add(Box.createVerticalStrut(14));
+        content.add(currLbl);
+        content.add(Box.createVerticalStrut(4));
+        content.add(currField);
+        content.add(Box.createVerticalStrut(10));
+        content.add(newLbl);
+        content.add(Box.createVerticalStrut(4));
+        content.add(newField);
+        content.add(Box.createVerticalStrut(10));
+        content.add(confLbl);
+        content.add(Box.createVerticalStrut(4));
+        content.add(confField);
+        content.add(Box.createVerticalStrut(6));
+        content.add(errLabel);
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnRow.setBackground(UITheme.PAPER_ALT);
+        btnRow.setBorder(new CompoundBorder(
+                new MatteBorder(1, 0, 0, 0, UITheme.RULE),
+                new EmptyBorder(12, 28, 12, 28)
+        ));
+
+        JButton cancelBtn = UITheme.createSecondaryButton("Cancel");
+        JButton updateBtn = UITheme.createPrimaryButton("Update Password");
+
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        Runnable updateAction = () -> {
+            String curr = new String(currField.getPassword()).trim();
+            String n1 = new String(newField.getPassword()).trim();
+            String n2 = new String(confField.getPassword()).trim();
+
+            if (!fileManager.verifyAuditProtectionPassword(curr)) {
+                errLabel.setText("\u26A0 Current password is incorrect.");
+                currField.setText("");
+                currField.requestFocusInWindow();
+                return;
+            }
+            if (n1.isEmpty() || n1.length() < 4) {
+                errLabel.setText("\u26A0 New password must be at least 4 characters.");
+                newField.requestFocusInWindow();
+                return;
+            }
+            if (!n1.equals(n2)) {
+                errLabel.setText("\u26A0 New passwords do not match.");
+                confField.setText("");
+                confField.requestFocusInWindow();
+                return;
+            }
+
+            boolean ok = fileManager.setAuditProtectionPassword(n1);
+            if (!ok) {
+                errLabel.setText("\u26A0 Failed to write updated password to disk.");
+                return;
+            }
+
+            auditLogger.log("Audit security updated", "Audit protection password updated by Admin: " + admin.getUsername());
+            dialog.dispose();
+            setStatus("Audit protection password updated");
+            JOptionPane.showMessageDialog(this, "Audit Protection Password has been successfully updated.", "Password Updated", JOptionPane.INFORMATION_MESSAGE);
+        };
+
+        updateBtn.addActionListener(e -> updateAction.run());
+        confField.addActionListener(e -> updateAction.run());
+
+        dialog.getRootPane().registerKeyboardAction(
+                e -> dialog.dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
+
+        btnRow.add(cancelBtn);
+        btnRow.add(updateBtn);
+
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(btnRow, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        currField.requestFocusInWindow();
+        dialog.setVisible(true);
     }
 
     private void handleLogout() {

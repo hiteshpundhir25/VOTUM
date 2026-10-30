@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Automated Verification Suite for Votum.
@@ -57,6 +58,7 @@ public class VotumTestSuite {
             test22_ElectionWindowValidation();
             test23_CreateElectionLifecycle();
             test24_ResultPreviewDoesNotAudit();
+            test25_AuditProtectionPasswordSecurity();
         } finally {
             cleanTestDirectory();
         }
@@ -794,6 +796,60 @@ public class VotumTestSuite {
             }
         } catch (Exception e) {
             fail("Test 24: Result Preview", e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Test 25: Audit Protection Password setup, SHA-256 verification, and persistence
+    // -------------------------------------------------------------
+    private static void test25_AuditProtectionPasswordSecurity() {
+        TestContext ctx = createIsolatedContext();
+        try {
+            // Initially, no password should be configured
+            boolean initialHasPwd = ctx.fileManager.hasAuditProtectionPassword();
+            boolean initialVerifyRandom = ctx.fileManager.verifyAuditProtectionPassword("any123");
+
+            // Empty/null password rejection
+            boolean rejectEmpty = !ctx.fileManager.setAuditProtectionPassword("");
+            boolean rejectNull = !ctx.fileManager.setAuditProtectionPassword(null);
+
+            // Set valid password
+            String plainPassword = "AdminSecurePass!99";
+            boolean setOk = ctx.fileManager.setAuditProtectionPassword(plainPassword);
+
+            // Now password should be reported as set
+            boolean hasPwdAfter = ctx.fileManager.hasAuditProtectionPassword();
+
+            // Correct password verifies successfully
+            boolean verifyCorrect = ctx.fileManager.verifyAuditProtectionPassword(plainPassword);
+
+            // Incorrect password is strictly rejected
+            boolean verifyWrong = !ctx.fileManager.verifyAuditProtectionPassword("WrongPassword123");
+            boolean verifyCase = !ctx.fileManager.verifyAuditProtectionPassword(plainPassword.toLowerCase(Locale.ROOT));
+
+            // Persistence check: reload fresh FileManager instance pointing to same directory
+            FileManager reloadedManager = new FileManager(TEST_DATA_DIR);
+            boolean persistsHasPwd = reloadedManager.hasAuditProtectionPassword();
+            boolean persistsVerify = reloadedManager.verifyAuditProtectionPassword(plainPassword);
+            boolean persistsRejectWrong = !reloadedManager.verifyAuditProtectionPassword("WrongPassword123");
+
+            // Clear password check
+            boolean cleared = reloadedManager.clearAuditProtectionPassword();
+            boolean hasPwdAfterClear = reloadedManager.hasAuditProtectionPassword();
+
+            if (!initialHasPwd && !initialVerifyRandom && rejectEmpty && rejectNull
+                    && setOk && hasPwdAfter && verifyCorrect && verifyWrong && verifyCase
+                    && persistsHasPwd && persistsVerify && persistsRejectWrong
+                    && cleared && !hasPwdAfterClear) {
+                pass("Test 25: Audit protection password setup, SHA-256 digest hashing, and persistence verified");
+            } else {
+                fail("Test 25: Audit Protection Password",
+                        "initialHasPwd=" + initialHasPwd + ", setOk=" + setOk + ", hasPwdAfter=" + hasPwdAfter
+                        + ", verifyCorrect=" + verifyCorrect + ", verifyWrong=" + verifyWrong
+                        + ", persistsVerify=" + persistsVerify + ", cleared=" + cleared);
+            }
+        } catch (Exception e) {
+            fail("Test 25: Audit Protection Password", e.getMessage());
         }
     }
 

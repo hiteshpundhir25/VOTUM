@@ -3,6 +3,9 @@ package com.votum.storage;
 import com.votum.model.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -23,6 +26,7 @@ public final class FileManager {
     private final String candidatesFile;
     private final String electionsFile;
     private final String votesFile;
+    private final String auditSecurityFile;
 
     public FileManager() {
         this("data");
@@ -35,6 +39,7 @@ public final class FileManager {
         this.candidatesFile = dataDir + File.separator + "candidates.txt";
         this.electionsFile = dataDir + File.separator + "elections.txt";
         this.votesFile = dataDir + File.separator + "votes.txt";
+        this.auditSecurityFile = dataDir + File.separator + "security.txt";
 
         ensureDirectoryExists();
         initializeDemoDataIfEmpty();
@@ -509,6 +514,121 @@ public final class FileManager {
         List<Vote> votes = loadVotes();
         votes.add(vote);
         return saveVotes(votes);
+    }
+
+    // ==========================================
+    // AUDIT LOG DELETION SECURITY (PASSWORD PROTECTION)
+    // ==========================================
+
+    /**
+     * Computes the SHA-256 cryptographic digest of a password.
+     */
+    public static String hashSHA256(String input) {
+        if (input == null) return "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(input.getBytes(StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not available in JVM", e);
+        }
+    }
+
+    /**
+     * Checks if an audit protection password has been configured.
+     */
+    public synchronized boolean hasAuditProtectionPassword() {
+        File file = new File(auditSecurityFile);
+        if (!file.exists() || file.length() == 0) {
+            return false;
+        }
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("audit.password.hash=")) {
+                    String hash = line.substring("audit.password.hash=".length()).trim();
+                    return !hash.isEmpty();
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading audit security file: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Stores the SHA-256 hash of the audit protection password to disk.
+     */
+    public synchronized boolean setAuditProtectionPassword(String plainPassword) {
+        if (plainPassword == null || plainPassword.trim().isEmpty()) {
+            return false;
+        }
+        String hash = hashSHA256(plainPassword.trim());
+        File file = new File(auditSecurityFile);
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, false))) {
+            writer.write("# VOTUM Security Configuration — Protected Audit Trail");
+            writer.newLine();
+            writer.write("audit.password.hash=" + hash);
+            writer.newLine();
+            return true;
+        } catch (IOException e) {
+            System.err.println("Error saving audit protection password: " + e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Verifies an entered plain password against the stored SHA-256 hash.
+     */
+    public synchronized boolean verifyAuditProtectionPassword(String plainPassword) {
+        if (plainPassword == null || plainPassword.trim().isEmpty()) {
+            return false;
+        }
+        File file = new File(auditSecurityFile);
+        if (!file.exists()) {
+            return false;
+        }
+        String storedHash = "";
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                line = line.trim();
+                if (line.startsWith("audit.password.hash=")) {
+                    storedHash = line.substring("audit.password.hash=".length()).trim();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error verifying audit protection password: " + e.getMessage());
+            return false;
+        }
+        if (storedHash.isEmpty()) {
+            return false;
+        }
+        String inputHash = hashSHA256(plainPassword.trim());
+        return storedHash.equalsIgnoreCase(inputHash);
+    }
+
+    /**
+     * Clears the stored audit protection password (used for test resets).
+     */
+    public synchronized boolean clearAuditProtectionPassword() {
+        File file = new File(auditSecurityFile);
+        if (file.exists()) {
+            return file.delete();
+        }
+        return true;
     }
 
     /**
