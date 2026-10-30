@@ -90,8 +90,11 @@ public final class LoginFrame extends JFrame {
 
     private void initUI() {
         setTitle("VOTUM — Digital Campus Election System");
-        setSize(1120, 800);
+        setUndecorated(true);
+        setAlwaysOnTop(true);
         setMinimumSize(new Dimension(960, 700));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(0, 0, screenSize.width, screenSize.height);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -118,6 +121,11 @@ public final class LoginFrame extends JFrame {
         add(new UITheme.CenteredPage(buildColophon(), 1120), BorderLayout.SOUTH);
 
         getRootPane().setDefaultButton(loginButton);
+        getRootPane().registerKeyboardAction(
+                e -> handleExitApplication(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowOpened(WindowEvent e) {

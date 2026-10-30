@@ -19,6 +19,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.Duration;
@@ -90,8 +91,11 @@ public final class VoterDashboard extends JFrame {
 
     private void initUI() {
         setTitle("VOTUM — Student Voting Portal (" + voter.getName() + ")");
-        setSize(1180, 820);
+        setUndecorated(true);
+        setAlwaysOnTop(true);
         setMinimumSize(new Dimension(920, 700));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(0, 0, screenSize.width, screenSize.height);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -123,6 +127,11 @@ public final class VoterDashboard extends JFrame {
         add(UITheme.wrapContentScroll(page), BorderLayout.CENTER);
 
         getRootPane().setDefaultButton(submitVoteButton);
+        getRootPane().registerKeyboardAction(
+                e -> handleExitApplication(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
         refreshBallotState();
     }
 

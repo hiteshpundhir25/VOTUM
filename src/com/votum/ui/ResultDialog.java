@@ -33,6 +33,7 @@ public final class ResultDialog extends JDialog {
     private void initUI(ElectionResult result) {
         setSize(760, 720);
         setMinimumSize(new Dimension(720, 620));
+        setAlwaysOnTop(true);
         setLocationRelativeTo(getParent());
         getContentPane().setBackground(UITheme.PAPER);
         setLayout(new BorderLayout(0, 0));

@@ -24,6 +24,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -160,8 +161,11 @@ public final class AdminDashboard extends JFrame {
 
     private void initUI() {
         setTitle("VOTUM — Administrator Control Center");
-        setSize(1280, 830);
+        setUndecorated(true);
+        setAlwaysOnTop(true);
         setMinimumSize(new Dimension(1080, 680));
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setBounds(0, 0, screenSize.width, screenSize.height);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -292,6 +296,12 @@ public final class AdminDashboard extends JFrame {
         add(statusBar, BorderLayout.SOUTH);
 
         updateNavSelection("DASHBOARD");
+
+        getRootPane().registerKeyboardAction(
+                e -> handleExitApplication(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
+                JComponent.WHEN_IN_FOCUSED_WINDOW
+        );
     }
 
     private JButton createNavButton(String text, String key) {
