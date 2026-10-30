@@ -59,6 +59,10 @@ public class VotumTestSuite {
             test23_CreateElectionLifecycle();
             test24_ResultPreviewDoesNotAudit();
             test25_AuditProtectionPasswordSecurity();
+            test26_CandidateRemoval();
+            test27_VoterEligibilityToggle();
+            test28_VoterDeletion();
+            test29_CandidateUpdate();
         } finally {
             cleanTestDirectory();
         }
@@ -863,6 +867,201 @@ public class VotumTestSuite {
             }
         } catch (Exception e) {
             fail("Test 25: Audit Protection Password", e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Test 26: Candidate removal cascades ballot purge and audits removal
+    // -------------------------------------------------------------
+    private static void test26_CandidateRemoval() {
+        TestContext ctx = createIsolatedContext();
+        try {
+            // Register a candidate C999
+            ctx.electionService.addCandidate("C999", "Candidate To Remove", "CSE", "E001", "Short term campaign");
+            boolean candidateExistsBefore = ctx.fileManager.loadCandidates().stream()
+                    .anyMatch(c -> "C999".equals(c.getCandidateId()));
+
+            // Cast a vote for C999 from V001
+            ctx.votingService.castVote("V001", "E001", "C999");
+            boolean voteRecorded = ctx.fileManager.loadVotes().stream()
+                    .anyMatch(v -> "C999".equals(v.getCandidateId()));
+
+            // Remove candidate C999
+            boolean removed = ctx.electionService.removeCandidate("C999");
+
+            // Candidate should be gone
+            boolean candidateGone = ctx.fileManager.loadCandidates().stream()
+                    .noneMatch(c -> "C999".equals(c.getCandidateId()));
+
+            // Associated ballot for C999 should be purged
+            boolean votePurged = ctx.fileManager.loadVotes().stream()
+                    .noneMatch(v -> "C999".equals(v.getCandidateId()));
+
+            // Affected voter V001 should have hasVoted reset
+            Voter v001 = ctx.fileManager.loadVoters().stream()
+                    .filter(v -> "V001".equals(v.getVoterId()))
+                    .findFirst().orElse(null);
+            boolean voterReset = v001 != null && !v001.hasVoted() && "".equals(v001.getVotedElectionId());
+
+            // Audit log should contain entry
+            boolean audited = ctx.auditLogger.readAllLogs().stream()
+                    .anyMatch(l -> l.contains("Candidate removed") && l.contains("C999"));
+
+            if (candidateExistsBefore && voteRecorded && removed && candidateGone && votePurged && voterReset && audited) {
+                pass("Test 26: Candidate removal cascades ballot purge, resets voter state, and logs audit record");
+            } else {
+                fail("Test 26: Candidate Removal", "removed=" + removed + ", candidateGone=" + candidateGone
+                        + ", votePurged=" + votePurged + ", voterReset=" + voterReset + ", audited=" + audited);
+            }
+        } catch (Exception e) {
+            fail("Test 26: Candidate Removal", e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Test 27: Voter eligibility toggling (Eligible <-> Ineligible)
+    // -------------------------------------------------------------
+    private static void test27_VoterEligibilityToggle() {
+        TestContext ctx = createIsolatedContext();
+        try {
+            // V005 starts as Ineligible in baseline
+            Voter v005Initial = ctx.fileManager.loadVoters().stream()
+                    .filter(v -> "V005".equals(v.getVoterId()))
+                    .findFirst().orElse(null);
+            boolean startsIneligible = v005Initial != null && !v005Initial.isEligible();
+
+            // Toggle V005 to ELIGIBLE
+            boolean markEligibleOk = ctx.electionService.setVoterEligibility("V005", true);
+            Voter v005AfterEligible = ctx.fileManager.loadVoters().stream()
+                    .filter(v -> "V005".equals(v.getVoterId()))
+                    .findFirst().orElse(null);
+            boolean isNowEligible = v005AfterEligible != null && v005AfterEligible.isEligible();
+
+            // Toggle V001 (eligible) to INELIGIBLE
+            boolean markIneligibleOk = ctx.electionService.setVoterEligibility("V001", false);
+            Voter v001AfterIneligible = ctx.fileManager.loadVoters().stream()
+                    .filter(v -> "V001".equals(v.getVoterId()))
+                    .findFirst().orElse(null);
+            boolean isNowIneligible = v001AfterIneligible != null && !v001AfterIneligible.isEligible();
+
+            // Verify Ineligible voter cannot vote
+            boolean voteRejected = false;
+            try {
+                ctx.votingService.castVote("V001", "E001", "C001");
+            } catch (com.votum.exception.VotumException expected) {
+                assert expected != null;
+                voteRejected = true;
+            }
+
+            // Verify audit logging
+            boolean auditedEligible = ctx.auditLogger.readAllLogs().stream()
+                    .anyMatch(l -> l.contains("Voter eligibility updated") && l.contains("V005") && l.contains("true"));
+            boolean auditedIneligible = ctx.auditLogger.readAllLogs().stream()
+                    .anyMatch(l -> l.contains("Voter eligibility updated") && l.contains("V001") && l.contains("false"));
+
+            if (startsIneligible && markEligibleOk && isNowEligible && markIneligibleOk && isNowIneligible
+                    && voteRejected && auditedEligible && auditedIneligible) {
+                pass("Test 27: Voter eligibility toggle updates status, enforces ballot permission, and records audit trail");
+            } else {
+                fail("Test 27: Voter Eligibility Toggle", "startsIneligible=" + startsIneligible
+                        + ", markEligibleOk=" + markEligibleOk + ", isNowEligible=" + isNowEligible
+                        + ", voteRejected=" + voteRejected);
+            }
+        } catch (Exception e) {
+            fail("Test 27: Voter Eligibility Toggle", e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Test 28: Voter record deletion cascades ballot purge and audits action
+    // -------------------------------------------------------------
+    private static void test28_VoterDeletion() {
+        TestContext ctx = createIsolatedContext();
+        try {
+            // Add a temporary voter V999
+            ctx.electionService.addVoter("V999", "Temp Student", "Physics", "voter999", "voter123", true);
+            boolean voterExists = ctx.fileManager.loadVoters().stream()
+                    .anyMatch(v -> "V999".equals(v.getVoterId()));
+
+            // Cast ballot from V999
+            ctx.votingService.castVote("V999", "E001", "C001");
+            boolean ballotExists = ctx.fileManager.loadVotes().stream()
+                    .anyMatch(v -> "V999".equals(v.getVoterId()));
+
+            // Delete voter V999
+            boolean deleted = ctx.electionService.deleteVoter("V999");
+
+            // Verify V999 is gone from voter list
+            boolean voterGone = ctx.fileManager.loadVoters().stream()
+                    .noneMatch(v -> "V999".equals(v.getVoterId()));
+
+            // Verify V999's ballot was purged
+            boolean ballotPurged = ctx.fileManager.loadVotes().stream()
+                    .noneMatch(v -> "V999".equals(v.getVoterId()));
+
+            // Verify audit trail
+            boolean audited = ctx.auditLogger.readAllLogs().stream()
+                    .anyMatch(l -> l.contains("Voter record deleted") && l.contains("V999"));
+
+            if (voterExists && ballotExists && deleted && voterGone && ballotPurged && audited) {
+                pass("Test 28: Voter deletion permanently purges record, cascades ballot removal, and logs audit record");
+            } else {
+                fail("Test 28: Voter Deletion", "deleted=" + deleted + ", voterGone=" + voterGone
+                        + ", ballotPurged=" + ballotPurged + ", audited=" + audited);
+            }
+        } catch (Exception e) {
+            fail("Test 28: Voter Deletion", e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------
+    // Test 29: Candidate profile update and audit logging
+    // -------------------------------------------------------------
+    private static void test29_CandidateUpdate() {
+        TestContext ctx = createIsolatedContext();
+        try {
+            // Register a candidate C888
+            ctx.electionService.addCandidate("C888", "Initial Candidate Name", "Mech", "E001", "Initial Slogan");
+
+            // Update candidate details
+            Candidate updated = ctx.electionService.updateCandidate("C888", "Revised Candidate Name", "Aero", "E001", "Revised Visionary Slogan");
+
+            // Verify memory object
+            boolean memoryMatch = "Revised Candidate Name".equals(updated.getName())
+                    && "Aero".equals(updated.getDepartment())
+                    && "Revised Visionary Slogan".equals(updated.getSlogan());
+
+            // Verify disk persistence
+            Candidate loaded = ctx.fileManager.loadCandidates().stream()
+                    .filter(c -> "C888".equals(c.getCandidateId()))
+                    .findFirst().orElse(null);
+
+            boolean diskMatch = loaded != null
+                    && "Revised Candidate Name".equals(loaded.getName())
+                    && "Aero".equals(loaded.getDepartment())
+                    && "Revised Visionary Slogan".equals(loaded.getSlogan());
+
+            // Verify audit logging
+            boolean audited = ctx.auditLogger.readAllLogs().stream()
+                    .anyMatch(l -> l.contains("Candidate updated") && l.contains("C888") && l.contains("Revised Candidate Name"));
+
+            // Verify validation prevents invalid updates
+            boolean blankNameRejected = false;
+            try {
+                ctx.electionService.updateCandidate("C888", "", "Aero", "E001", "Slogan");
+            } catch (InvalidElectionException expected) {
+                assert expected != null;
+                blankNameRejected = true;
+            }
+
+            if (memoryMatch && diskMatch && audited && blankNameRejected) {
+                pass("Test 29: Candidate profile update modifies fields, persists to disk, and records audit record");
+            } else {
+                fail("Test 29: Candidate Update", "memoryMatch=" + memoryMatch + ", diskMatch=" + diskMatch
+                        + ", audited=" + audited + ", blankNameRejected=" + blankNameRejected);
+            }
+        } catch (Exception e) {
+            fail("Test 29: Candidate Update", e.getMessage());
         }
     }
 

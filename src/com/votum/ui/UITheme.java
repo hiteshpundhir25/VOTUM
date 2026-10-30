@@ -160,7 +160,7 @@ public final class UITheme {
                 installed.add(family.toLowerCase(Locale.ROOT));
             }
         } catch (Throwable headlessOrRestricted) {
-            headlessOrRestricted.getClass();
+            assert headlessOrRestricted != null;
             return logicalFallback;
         }
         for (String candidate : candidates) {
@@ -200,7 +200,7 @@ public final class UITheme {
                     enabled = false;
                 }
             } catch (Throwable ignored) {
-                ignored.getClass();
+                assert ignored != null;
                 // Desktop properties are optional; keep the default.
             }
 
@@ -1122,7 +1122,7 @@ public final class UITheme {
                 to = Double.parseDouble(target.group(1));
                 decimals = decimalPlaces(target.group(1));
             } catch (NumberFormatException malformed) {
-                malformed.getClass();
+                assert malformed != null;
                 valueLabel.setText(next);
                 return;
             }

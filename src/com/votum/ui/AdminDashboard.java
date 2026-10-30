@@ -126,6 +126,8 @@ public final class AdminDashboard extends JFrame {
     private JLabel voterCountLabel;
     private JLabel candidateEmptyLabel;
     private JLabel voterEmptyLabel;
+    private JTextField candidateIdField;
+    private JTextField voterIdField;
 
     // Shell Status Feedback
     private JLabel statusLineLabel;
@@ -947,13 +949,13 @@ public final class AdminDashboard extends JFrame {
         JPanel formCard = UITheme.createCardPanel();
         formCard.setLayout(new BoxLayout(formCard, BoxLayout.Y_AXIS));
 
-        JLabel header = new JLabel("Register New Candidate");
+        JLabel header = new JLabel("Create / Register Candidate");
         header.setFont(UITheme.FONT_HEADER);
         header.setForeground(UITheme.INK);
         header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JTextField cIdField = UITheme.createTextField(15);
-        cIdField.setText(suggestNextId("C", loadCandidateIds()));
+        candidateIdField = UITheme.createTextField(15);
+        candidateIdField.setText(suggestNextId("C", loadCandidateIds()));
         JTextField cNameField = UITheme.createTextField(15);
         JTextField cDeptField = UITheme.createTextField(15);
         JTextField cSloganField = UITheme.createTextField(15);
@@ -962,9 +964,21 @@ public final class AdminDashboard extends JFrame {
         electionSelectorForCandidates.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
         electionSelectorForCandidates.addActionListener(e -> refreshCandidatesTable());
 
-        JButton addCandidateBtn = UITheme.createPrimaryButton("Register Candidate");
+        JButton addCandidateBtn = UITheme.createPrimaryButton("+ Register Candidate");
         addCandidateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         addCandidateBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+
+        JButton editCandidateBtn = UITheme.createSecondaryButton("✎ Modify Candidate");
+        editCandidateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        editCandidateBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        editCandidateBtn.setToolTipText("Edit or modify candidate name, department, or campaign slogan");
+        editCandidateBtn.addActionListener(e -> handleEditCandidate());
+
+        JButton removeCandidateBtn = UITheme.createDangerButton("🗑 Remove Candidate");
+        removeCandidateBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        removeCandidateBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        removeCandidateBtn.setToolTipText("Remove or disqualify a candidate from the roster and purge their votes");
+        removeCandidateBtn.addActionListener(e -> handleRemoveCandidate());
 
         addCandidateBtn.addActionListener(e -> {
             String selectedElection = getSelectedElectionId(electionSelectorForCandidates, candidateElectionIds);
@@ -976,7 +990,7 @@ public final class AdminDashboard extends JFrame {
             }
             try {
                 electionService.addCandidate(
-                        cIdField.getText().trim(),
+                        candidateIdField.getText().trim(),
                         cNameField.getText().trim(),
                         cDeptField.getText().trim(),
                         selectedElection,
@@ -988,7 +1002,7 @@ public final class AdminDashboard extends JFrame {
                 cNameField.setText("");
                 cDeptField.setText("");
                 cSloganField.setText("");
-                cIdField.setText(suggestNextId("C", loadCandidateIds()));
+                candidateIdField.setText(suggestNextId("C", loadCandidateIds()));
                 refreshAllData();
             } catch (InvalidElectionException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -998,12 +1012,16 @@ public final class AdminDashboard extends JFrame {
         formCard.add(header);
         formCard.add(Box.createVerticalStrut(12));
         addFormField(formCard, "Target Election:", electionSelectorForCandidates);
-        addFormField(formCard, "Candidate ID:", cIdField);
+        addFormField(formCard, "Candidate ID:", candidateIdField);
         addFormField(formCard, "Full Name:", cNameField);
         addFormField(formCard, "Department:", cDeptField);
         addFormField(formCard, "Campaign Slogan:", cSloganField);
         formCard.add(Box.createVerticalStrut(10));
         formCard.add(addCandidateBtn);
+        formCard.add(Box.createVerticalStrut(8));
+        formCard.add(editCandidateBtn);
+        formCard.add(Box.createVerticalStrut(8));
+        formCard.add(removeCandidateBtn);
 
         // Table Card (Center)
         JPanel tableCard = UITheme.createCardPanel();
@@ -1027,6 +1045,15 @@ public final class AdminDashboard extends JFrame {
         for (int i = 0; i < candidateTable.getColumnCount(); i++) {
             candidateTable.getColumnModel().getColumn(i).setPreferredWidth(candidateWidths[i]);
         }
+
+        candidateTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (e.getClickCount() == 2 && candidateTable.getSelectedRow() != -1) {
+                    handleEditCandidate();
+                }
+            }
+        });
 
         candidateFilterField = UITheme.createTextField(14);
         candidateFilterField.setPreferredSize(new Dimension(200, 34));
@@ -1073,8 +1100,8 @@ public final class AdminDashboard extends JFrame {
         header.setForeground(UITheme.INK);
         header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JTextField vIdField = UITheme.createTextField(15);
-        vIdField.setText(suggestNextId("V", loadVoterIds()));
+        voterIdField = UITheme.createTextField(15);
+        voterIdField.setText(suggestNextId("V", loadVoterIds()));
         JTextField vNameField = UITheme.createTextField(15);
         JTextField vDeptField = UITheme.createTextField(15);
         JTextField vUsernameField = UITheme.createTextField(15);
@@ -1086,14 +1113,14 @@ public final class AdminDashboard extends JFrame {
         eligibleCheck.setForeground(UITheme.INK);
         eligibleCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JButton addVoterBtn = UITheme.createPrimaryButton("Register Voter");
+        JButton addVoterBtn = UITheme.createPrimaryButton("+ Register Voter");
         addVoterBtn.setAlignmentX(Component.LEFT_ALIGNMENT);
         addVoterBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
 
         addVoterBtn.addActionListener(e -> {
             try {
                 electionService.addVoter(
-                        vIdField.getText().trim(),
+                        voterIdField.getText().trim(),
                         vNameField.getText().trim(),
                         vDeptField.getText().trim(),
                         vUsernameField.getText().trim(),
@@ -1104,7 +1131,7 @@ public final class AdminDashboard extends JFrame {
                 vNameField.setText("");
                 vDeptField.setText("");
                 vUsernameField.setText("");
-                vIdField.setText(suggestNextId("V", loadVoterIds()));
+                voterIdField.setText(suggestNextId("V", loadVoterIds()));
                 refreshAllData();
             } catch (InvalidElectionException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Voter Registration Error", JOptionPane.ERROR_MESSAGE);
@@ -1113,7 +1140,7 @@ public final class AdminDashboard extends JFrame {
 
         formCard.add(header);
         formCard.add(Box.createVerticalStrut(12));
-        addFormField(formCard, "Voter ID:", vIdField);
+        addFormField(formCard, "Voter ID:", voterIdField);
         addFormField(formCard, "Full Name:", vNameField);
         addFormField(formCard, "Department:", vDeptField);
         addFormField(formCard, "Login Username:", vUsernameField);
@@ -1155,9 +1182,47 @@ public final class AdminDashboard extends JFrame {
         voterFilterField.getDocument().addDocumentListener(new FilterChangeListener(
                 voterTable, voterSorter, voterFilterField, voterCountLabel, voterEmptyLabel, VOTER_EMPTY_MESSAGE));
 
+        JPanel voterFooterPanel = new JPanel(new BorderLayout(10, 8));
+        voterFooterPanel.setOpaque(false);
+        voterFooterPanel.setBorder(new EmptyBorder(6, 0, 0, 0));
+        voterFooterPanel.add(voterEmptyLabel, BorderLayout.NORTH);
+
+        JPanel voterActionBar = new JPanel(new BorderLayout(8, 6));
+        voterActionBar.setOpaque(false);
+
+        JLabel voterActionPrompt = UITheme.createKicker("MANAGE VOTER RECORD (SELECT A ROW ABOVE):");
+        voterActionPrompt.setForeground(UITheme.MUTED);
+
+        JPanel btnGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        btnGroup.setOpaque(false);
+
+        JButton btnMarkEligible = UITheme.createSuccessButton("✓ Mark Eligible");
+        btnMarkEligible.setFont(UITheme.FONT_SMALL_BOLD);
+        btnMarkEligible.setToolTipText("Mark selected voter as Eligible to participate in elections");
+        btnMarkEligible.addActionListener(e -> handleUpdateVoterEligibility(true));
+
+        JButton btnMarkIneligible = UITheme.createSecondaryButton("✕ Mark Ineligible");
+        btnMarkIneligible.setFont(UITheme.FONT_SMALL_BOLD);
+        btnMarkIneligible.setToolTipText("Mark selected voter as Ineligible (bar from voting)");
+        btnMarkIneligible.addActionListener(e -> handleUpdateVoterEligibility(false));
+
+        JButton btnDeleteVoter = UITheme.createDangerButton("🗑 Delete Voter");
+        btnDeleteVoter.setFont(UITheme.FONT_SMALL_BOLD);
+        btnDeleteVoter.setToolTipText("Permanently delete this voter record and purge any cast ballots");
+        btnDeleteVoter.addActionListener(e -> handleDeleteVoter());
+
+        btnGroup.add(btnMarkEligible);
+        btnGroup.add(btnMarkIneligible);
+        btnGroup.add(btnDeleteVoter);
+
+        voterActionBar.add(voterActionPrompt, BorderLayout.NORTH);
+        voterActionBar.add(btnGroup, BorderLayout.CENTER);
+
+        voterFooterPanel.add(voterActionBar, BorderLayout.SOUTH);
+
         tableCard.add(buildRosterHeader(tableHeader, voterFilterField, voterCountLabel), BorderLayout.NORTH);
         tableCard.add(wrapScrollPane(voterTable), BorderLayout.CENTER);
-        tableCard.add(voterEmptyLabel, BorderLayout.SOUTH);
+        tableCard.add(voterFooterPanel, BorderLayout.SOUTH);
 
         panel.add(formCard, BorderLayout.WEST);
         panel.add(tableCard, BorderLayout.CENTER);
@@ -1957,6 +2022,12 @@ public final class AdminDashboard extends JFrame {
         if (newElectionIdField != null && newElectionIdField.getText().trim().isEmpty()) {
             refreshElectionIdSuggestion();
         }
+        if (candidateIdField != null && (candidateIdField.getText().trim().isEmpty() || candidateIdField.getText().trim().startsWith("C"))) {
+            candidateIdField.setText(suggestNextId("C", loadCandidateIds()));
+        }
+        if (voterIdField != null && (voterIdField.getText().trim().isEmpty() || voterIdField.getText().trim().startsWith("V"))) {
+            voterIdField.setText(suggestNextId("V", loadVoterIds()));
+        }
         if ("DASHBOARD".equals(currentNavKey)) {
             refreshDashboardMetrics();
         }
@@ -1973,7 +2044,8 @@ public final class AdminDashboard extends JFrame {
             try {
                 highest = Math.max(highest, Integer.parseInt(suffix));
             } catch (NumberFormatException ignored) {
-                ignored.getClass();
+                assert ignored != null;
+                /* non-numeric suffix */
             }
         }
         return String.format(Locale.ROOT, "%s%03d", prefix, highest + 1);
@@ -1993,6 +2065,398 @@ public final class AdminDashboard extends JFrame {
             ids.add(v.getVoterId());
         }
         return ids;
+    }
+
+    private void handleEditCandidate() {
+        String targetCandidateId = null;
+
+        int selectedViewRow = candidateTable.getSelectedRow();
+        if (selectedViewRow != -1) {
+            int modelRow = candidateTable.convertRowIndexToModel(selectedViewRow);
+            targetCandidateId = (String) candidateTableModel.getValueAt(modelRow, 0);
+        } else {
+            String currentElectionId = getSelectedElectionId(electionSelectorForCandidates, candidateElectionIds);
+            List<Candidate> candidates = (currentElectionId != null)
+                    ? electionService.getCandidatesForElection(currentElectionId)
+                    : electionService.getAllCandidates();
+
+            if (candidates.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "There are no candidates available to modify.",
+                        "No Candidates",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            String[] candidateOptions = new String[candidates.size()];
+            for (int i = 0; i < candidates.size(); i++) {
+                Candidate c = candidates.get(i);
+                candidateOptions[i] = c.getCandidateId() + " \u2014 " + c.getName() + " (" + c.getDepartment() + ")";
+            }
+
+            String selectedOption = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Select the candidate you want to edit / modify:\n(Tip: You can also select or double-click a row in the table)",
+                    "Modify Candidate",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    candidateOptions,
+                    candidateOptions[0]);
+
+            if (selectedOption == null) {
+                return;
+            }
+
+            for (Candidate c : candidates) {
+                if (selectedOption.startsWith(c.getCandidateId() + " \u2014 ")) {
+                    targetCandidateId = c.getCandidateId();
+                    break;
+                }
+            }
+        }
+
+        if (targetCandidateId == null) {
+            return;
+        }
+
+        Candidate candidateToEdit = null;
+        for (Candidate c : electionService.getAllCandidates()) {
+            if (c.getCandidateId().equalsIgnoreCase(targetCandidateId)) {
+                candidateToEdit = c;
+                break;
+            }
+        }
+
+        if (candidateToEdit == null) {
+            JOptionPane.showMessageDialog(this, "Candidate not found.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        openModifyCandidateDialog(candidateToEdit);
+    }
+
+    private void openModifyCandidateDialog(Candidate candidate) {
+        JDialog dialog = new JDialog(this, "Modify Candidate \u2014 " + candidate.getName() + " (" + candidate.getCandidateId() + ")", true);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(UITheme.PAPER);
+        dialog.setResizable(false);
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(UITheme.PAPER);
+        content.setBorder(new EmptyBorder(24, 28, 20, 28));
+
+        JLabel kicker = UITheme.createKicker("ROSTER MANAGEMENT \u00B7 CANDIDATE PROFILE");
+        kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel title = new JLabel("Edit Candidate Details");
+        title.setFont(UITheme.FONT_HEADER);
+        title.setForeground(UITheme.INK);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel desc = new JLabel("<html><div style='width:420px; line-height:1.4; color:#52525B;'>"
+                + "Modify the candidate's full name, academic department, and campaign slogan below. "
+                + "Candidate ID and target election are locked to maintain election integrity.</div></html>");
+        desc.setFont(UITheme.FONT_BODY);
+        desc.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel idLabel = new JLabel("Candidate ID: " + candidate.getCandidateId() + "   \u2022   Target Election: " + candidate.getElectionId());
+        idLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        idLabel.setForeground(UITheme.INK);
+        idLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel nameLabel = new JLabel("Full Name:");
+        nameLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        nameLabel.setForeground(UITheme.MUTED);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField nameField = UITheme.createTextField(20);
+        nameField.setText(candidate.getName());
+        nameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        nameField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel deptLabel = new JLabel("Department / Faculty:");
+        deptLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        deptLabel.setForeground(UITheme.MUTED);
+        deptLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField deptField = UITheme.createTextField(20);
+        deptField.setText(candidate.getDepartment());
+        deptField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        deptField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel sloganLabel = new JLabel("Campaign Slogan / Statement:");
+        sloganLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        sloganLabel.setForeground(UITheme.MUTED);
+        sloganLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField sloganField = UITheme.createTextField(20);
+        sloganField.setText(candidate.getSlogan());
+        sloganField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        sloganField.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel errLabel = new JLabel(" ");
+        errLabel.setFont(UITheme.FONT_SMALL_BOLD);
+        errLabel.setForeground(UITheme.DANGER);
+        errLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        content.add(kicker);
+        content.add(Box.createVerticalStrut(4));
+        content.add(title);
+        content.add(Box.createVerticalStrut(8));
+        content.add(desc);
+        content.add(Box.createVerticalStrut(14));
+        content.add(idLabel);
+        content.add(Box.createVerticalStrut(14));
+        content.add(nameLabel);
+        content.add(Box.createVerticalStrut(6));
+        content.add(nameField);
+        content.add(Box.createVerticalStrut(12));
+        content.add(deptLabel);
+        content.add(Box.createVerticalStrut(6));
+        content.add(deptField);
+        content.add(Box.createVerticalStrut(12));
+        content.add(sloganLabel);
+        content.add(Box.createVerticalStrut(6));
+        content.add(sloganField);
+        content.add(Box.createVerticalStrut(6));
+        content.add(errLabel);
+
+        JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        btnRow.setBackground(UITheme.PAPER_ALT);
+        btnRow.setBorder(new CompoundBorder(
+                new MatteBorder(1, 0, 0, 0, UITheme.RULE),
+                new EmptyBorder(12, 28, 12, 28)
+        ));
+
+        JButton cancelBtn = UITheme.createSecondaryButton("Cancel");
+        JButton saveBtn = UITheme.createPrimaryButton("\u2713 Save Changes");
+
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        saveBtn.addActionListener(e -> {
+            String newName = nameField.getText().trim();
+            String newDept = deptField.getText().trim();
+            String newSlogan = sloganField.getText().trim();
+
+            if (newName.isEmpty()) {
+                errLabel.setText("\u26A0 Full Name cannot be empty.");
+                nameField.requestFocusInWindow();
+                return;
+            }
+            if (newDept.isEmpty()) {
+                errLabel.setText("\u26A0 Department cannot be empty.");
+                deptField.requestFocusInWindow();
+                return;
+            }
+
+            try {
+                electionService.updateCandidate(candidate.getCandidateId(), newName, newDept, candidate.getElectionId(), newSlogan);
+                dialog.dispose();
+                JOptionPane.showMessageDialog(this,
+                        "Candidate " + candidate.getCandidateId() + " (" + newName + ") updated successfully!",
+                        "Changes Saved",
+                        JOptionPane.INFORMATION_MESSAGE);
+                refreshAllData();
+            } catch (InvalidElectionException ex) {
+                errLabel.setText("\u26A0 " + ex.getMessage());
+            }
+        });
+
+        btnRow.add(cancelBtn);
+        btnRow.add(saveBtn);
+
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(btnRow, BorderLayout.SOUTH);
+        dialog.getRootPane().setDefaultButton(saveBtn);
+
+        dialog.pack();
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+    }
+
+    private void handleRemoveCandidate() {
+        String targetCandidateId = null;
+        String targetCandidateName = null;
+
+        int selectedViewRow = candidateTable.getSelectedRow();
+        if (selectedViewRow != -1) {
+            int modelRow = candidateTable.convertRowIndexToModel(selectedViewRow);
+            targetCandidateId = (String) candidateTableModel.getValueAt(modelRow, 0);
+            targetCandidateName = (String) candidateTableModel.getValueAt(modelRow, 1);
+        } else {
+            String currentElectionId = getSelectedElectionId(electionSelectorForCandidates, candidateElectionIds);
+            List<Candidate> candidates = (currentElectionId != null)
+                    ? electionService.getCandidatesForElection(currentElectionId)
+                    : electionService.getAllCandidates();
+
+            if (candidates.isEmpty()) {
+                JOptionPane.showMessageDialog(this,
+                        "There are no candidates available to remove.",
+                        "No Candidates",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            String[] candidateOptions = new String[candidates.size()];
+            for (int i = 0; i < candidates.size(); i++) {
+                Candidate c = candidates.get(i);
+                candidateOptions[i] = c.getCandidateId() + " \u2014 " + c.getName() + " (" + c.getDepartment() + ")";
+            }
+
+            String selectedOption = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Select the candidate to remove / disqualify from the roster:\n(Tip: You can also select a row in the table directly)",
+                    "Remove Candidate",
+                    JOptionPane.WARNING_MESSAGE,
+                    null,
+                    candidateOptions,
+                    candidateOptions[0]);
+
+            if (selectedOption == null) {
+                return;
+            }
+
+            for (Candidate c : candidates) {
+                if (selectedOption.startsWith(c.getCandidateId() + " \u2014 ")) {
+                    targetCandidateId = c.getCandidateId();
+                    targetCandidateName = c.getName();
+                    break;
+                }
+            }
+        }
+
+        if (targetCandidateId == null) {
+            return;
+        }
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to remove / disqualify candidate:\n\n"
+                        + "   Candidate ID: " + targetCandidateId + "\n"
+                        + "   Name: " + targetCandidateName + "\n\n"
+                        + "WARNING: This permanently removes the candidate from the election\n"
+                        + "and purges any ballots cast for them. This action cannot be undone.",
+                "Confirm Candidate Removal",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                electionService.removeCandidate(targetCandidateId);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Candidate " + targetCandidateName + " (" + targetCandidateId + ") was removed successfully.",
+                        "Candidate Removed",
+                        JOptionPane.INFORMATION_MESSAGE);
+                refreshAllData();
+            } catch (InvalidElectionException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error Removing Candidate", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void handleUpdateVoterEligibility(boolean eligible) {
+        int selectedViewRow = voterTable.getSelectedRow();
+        if (selectedViewRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Please select a student voter from the table above to change their eligibility.",
+                    "No Voter Selected",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int modelRow = voterTable.convertRowIndexToModel(selectedViewRow);
+        String voterId = (String) voterTableModel.getValueAt(modelRow, 0);
+        String voterName = (String) voterTableModel.getValueAt(modelRow, 1);
+        String currentEligible = (String) voterTableModel.getValueAt(modelRow, 4);
+
+        if (eligible && "YES".equalsIgnoreCase(currentEligible)) {
+            JOptionPane.showMessageDialog(this,
+                    "Voter " + voterName + " (" + voterId + ") is already marked as ELIGIBLE.",
+                    "Already Eligible",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (!eligible && "NO".equalsIgnoreCase(currentEligible)) {
+            JOptionPane.showMessageDialog(this,
+                    "Voter " + voterName + " (" + voterId + ") is already marked as INELIGIBLE.",
+                    "Already Ineligible",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String targetStatus = eligible ? "ELIGIBLE" : "INELIGIBLE";
+        String prompt = eligible
+                ? "Mark student " + voterName + " (" + voterId + ") as ELIGIBLE to vote?"
+                : "Mark student " + voterName + " (" + voterId + ") as INELIGIBLE?\n"
+                        + "This will prevent them from casting ballots in any election until re-enabled.";
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                prompt,
+                "Confirm Eligibility Update",
+                JOptionPane.YES_NO_OPTION,
+                eligible ? JOptionPane.QUESTION_MESSAGE : JOptionPane.WARNING_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                electionService.setVoterEligibility(voterId, eligible);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Voter " + voterName + " (" + voterId + ") has been updated to " + targetStatus + ".",
+                        "Eligibility Updated",
+                        JOptionPane.INFORMATION_MESSAGE);
+                refreshAllData();
+            } catch (InvalidElectionException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Update Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void handleDeleteVoter() {
+        int selectedViewRow = voterTable.getSelectedRow();
+        if (selectedViewRow == -1) {
+            JOptionPane.showMessageDialog(this,
+                    "Please select a voter from the table above to delete their record.",
+                    "No Voter Selected",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        int modelRow = voterTable.convertRowIndexToModel(selectedViewRow);
+        String voterId = (String) voterTableModel.getValueAt(modelRow, 0);
+        String voterName = (String) voterTableModel.getValueAt(modelRow, 1);
+        String username = (String) voterTableModel.getValueAt(modelRow, 3);
+        String ballotStatus = (String) voterTableModel.getValueAt(modelRow, 5);
+
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to PERMANENTLY DELETE voter:\n\n"
+                        + "   Voter ID: " + voterId + "\n"
+                        + "   Name: " + voterName + "\n"
+                        + "   Username: " + username + "\n"
+                        + "   Ballot Status: " + ballotStatus + "\n\n"
+                        + "WARNING: This removes the voter from the roll and permanently purges\n"
+                        + "any cast ballots. This action cannot be undone.",
+                "Confirm Voter Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.ERROR_MESSAGE);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                electionService.deleteVoter(voterId);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Voter record for " + voterName + " (" + voterId + ") has been permanently deleted.",
+                        "Voter Deleted",
+                        JOptionPane.INFORMATION_MESSAGE);
+                refreshAllData();
+            } catch (InvalidElectionException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error Deleting Voter", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     private void openOfficialResultDialog() {
@@ -2591,7 +3055,7 @@ public final class AdminDashboard extends JFrame {
                         }
                     });
                 } catch (InterruptedException ex) {
-                    ex.getClass();
+                    assert ex != null;
                     Thread.currentThread().interrupt();
                     break;
                 }

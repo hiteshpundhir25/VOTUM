@@ -593,8 +593,8 @@ public final class LoginFrame extends JFrame {
 
         grid.add(createDemoProfileButton("🏛 Admin Desk", "admin", "admin123", "Officer"));
         grid.add(createDemoProfileButton("🗳 Voter 1 (Eligible)", "voter1", "voter123", "CS Student"));
-        grid.add(createDemoProfileButton("🗳 Voter 2 (Eligible)", "voter2", "voter234", "EE Student"));
-        grid.add(createDemoProfileButton("🔒 Voter 5 (Ineligible)", "voter5", "voter567", "Voted"));
+        grid.add(createDemoProfileButton("🗳 Voter 2 (Eligible)", "voter2", "voter123", "IT Student"));
+        grid.add(createDemoProfileButton("🔒 Voter 5 (Ineligible)", "voter5", "voter123", "Barred"));
 
         panel.add(header);
         panel.add(Box.createVerticalStrut(8));
@@ -644,8 +644,8 @@ public final class LoginFrame extends JFrame {
         boolean on = false;
         try {
             on = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
-        } catch (Exception unsupported) {
-            unsupported.getClass();
+        } catch (Exception ignored) {
+            assert ignored != null;
             on = false;
         }
         capsLockLabel.setText(on ? "\u26A0  Caps Lock is on" : " ");

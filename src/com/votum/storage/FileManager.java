@@ -75,17 +75,19 @@ public final class FileManager {
                     "Annual general election for student body president",
                     now.minusHours(1),
                     now.plusDays(1),
-                    ElectionStatus.OPEN
-            ));
+                    ElectionStatus.OPEN));
             saveElections(defaultElections);
         }
 
         File cFile = new File(candidatesFile);
         if (!cFile.exists() || cFile.length() == 0) {
             List<Candidate> defaultCandidates = new ArrayList<>();
-            defaultCandidates.add(new Candidate("C001", "Arjun Sharma", "Computer Science", "E001", "Better Campus Wi-Fi & Tech Labs"));
-            defaultCandidates.add(new Candidate("C002", "Priya Mehta", "Information Technology", "E001", "Transparent Student Representation"));
-            defaultCandidates.add(new Candidate("C003", "Rahul Verma", "Electronics & Comm.", "E001", "Sports & Cultural Fest Upgrades"));
+            defaultCandidates.add(new Candidate("C001", "Arjun Sharma", "Computer Science", "E001",
+                    "Better Campus Wi-Fi & Tech Labs"));
+            defaultCandidates.add(new Candidate("C002", "Priya Mehta", "Information Technology", "E001",
+                    "Transparent Student Representation"));
+            defaultCandidates.add(new Candidate("C003", "Rahul Verma", "Electronics & Comm.", "E001",
+                    "Sports & Cultural Fest Upgrades"));
             saveCandidates(defaultCandidates);
         }
 
@@ -93,10 +95,13 @@ public final class FileManager {
         if (!vFile.exists() || vFile.length() == 0) {
             List<Voter> defaultVoters = new ArrayList<>();
             defaultVoters.add(new Voter("V001", "Aarav Gupta", "Computer Science", "voter1", "voter123", true, false));
-            defaultVoters.add(new Voter("V002", "Ananya Singh", "Information Technology", "voter2", "voter123", true, false));
+            defaultVoters.add(
+                    new Voter("V002", "Ananya Singh", "Information Technology", "voter2", "voter123", true, false));
             defaultVoters.add(new Voter("V003", "Rohan Nair", "Mechanical Engg", "voter3", "voter123", true, false));
-            defaultVoters.add(new Voter("V004", "Sneha Patel", "Electronics & Comm.", "voter4", "voter123", true, false));
-            defaultVoters.add(new Voter("V005", "Dev Sharma", "Computer Science", "voter5", "voter123", false, false)); // Ineligible demo
+            defaultVoters
+                    .add(new Voter("V004", "Sneha Patel", "Electronics & Comm.", "voter4", "voter123", true, false));
+            defaultVoters.add(new Voter("V005", "Dev Sharma", "Computer Science", "voter5", "voter123", false, false)); // Ineligible
+                                                                                                                        // demo
             saveVoters(defaultVoters);
         }
 
@@ -105,14 +110,17 @@ public final class FileManager {
             try {
                 vtFile.createNewFile();
             } catch (IOException ignored) {
-                ignored.getClass();
+                assert ignored != null;
+                /* ignore */
             }
         }
     }
 
     /**
-     * Explicitly resets the persistent data store to the documented official demo baseline.
-     * Restores default administrator, default election (with active window), default candidates,
+     * Explicitly resets the persistent data store to the documented official demo
+     * baseline.
+     * Restores default administrator, default election (with active window),
+     * default candidates,
      * default eligible/ineligible voters, and clears all cast ballots.
      *
      * @return true if all files were successfully restored, false otherwise
@@ -129,19 +137,23 @@ public final class FileManager {
                 "Annual general election for student body president",
                 now.minusHours(1),
                 now.plusDays(7),
-                ElectionStatus.OPEN
-        ));
+                ElectionStatus.OPEN));
 
         List<Candidate> defaultCandidates = new ArrayList<>();
-        defaultCandidates.add(new Candidate("C001", "Arjun Sharma", "Computer Science", "E001", "Better Campus Wi-Fi & Tech Labs"));
-        defaultCandidates.add(new Candidate("C002", "Priya Mehta", "Information Technology", "E001", "Transparent Student Representation"));
-        defaultCandidates.add(new Candidate("C003", "Rahul Verma", "Electronics & Comm.", "E001", "Sports & Cultural Fest Upgrades"));
+        defaultCandidates.add(
+                new Candidate("C001", "Arjun Sharma", "Computer Science", "E001", "Better Campus Wi-Fi & Tech Labs"));
+        defaultCandidates.add(new Candidate("C002", "Priya Mehta", "Information Technology", "E001",
+                "Transparent Student Representation"));
+        defaultCandidates.add(
+                new Candidate("C003", "Rahul Verma", "Electronics & Comm.", "E001", "Sports & Cultural Fest Upgrades"));
 
         List<Voter> defaultVoters = new ArrayList<>();
         defaultVoters.add(new Voter("V001", "Aarav Gupta", "Computer Science", "voter1", "voter123", true, false, ""));
-        defaultVoters.add(new Voter("V002", "Ananya Singh", "Information Technology", "voter2", "voter123", true, false, ""));
+        defaultVoters.add(
+                new Voter("V002", "Ananya Singh", "Information Technology", "voter2", "voter123", true, false, ""));
         defaultVoters.add(new Voter("V003", "Rohan Nair", "Mechanical Engg", "voter3", "voter123", true, false, ""));
-        defaultVoters.add(new Voter("V004", "Sneha Patel", "Electronics & Comm.", "voter4", "voter123", true, false, ""));
+        defaultVoters
+                .add(new Voter("V004", "Sneha Patel", "Electronics & Comm.", "voter4", "voter123", true, false, ""));
         defaultVoters.add(new Voter("V005", "Dev Sharma", "Computer Science", "voter5", "voter123", false, false, ""));
 
         boolean ok = saveAdmins(defaultAdmins);
@@ -158,14 +170,16 @@ public final class FileManager {
     public synchronized List<Admin> loadAdmins() {
         List<Admin> admins = new ArrayList<>();
         File file = new File(usersFile);
-        if (!file.exists()) return admins;
+        if (!file.exists())
+            return admins;
 
         int skipped = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
+                if (line.isEmpty() || line.startsWith("#"))
+                    continue;
                 String[] parts = line.split(DELIMITER, -1);
                 if (parts.length < 5) {
                     skipped++;
@@ -191,8 +205,7 @@ public final class FileManager {
                         sanitize(admin.getPassword()),
                         sanitize(admin.getAdminId()),
                         sanitize(admin.getFullName()),
-                        sanitize(admin.getEmail())
-                );
+                        sanitize(admin.getEmail()));
                 bw.write(line);
                 bw.newLine();
             }
@@ -209,14 +222,16 @@ public final class FileManager {
     public synchronized List<Voter> loadVoters() {
         List<Voter> voters = new ArrayList<>();
         File file = new File(votersFile);
-        if (!file.exists()) return voters;
+        if (!file.exists())
+            return voters;
 
         int skipped = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
+                if (line.isEmpty() || line.startsWith("#"))
+                    continue;
                 String[] parts = line.split(DELIMITER, -1);
                 if (parts.length < 7) {
                     skipped++;
@@ -231,7 +246,8 @@ public final class FileManager {
                 boolean eligible = Boolean.parseBoolean(parts[5]);
                 boolean hasVoted = Boolean.parseBoolean(parts[6]);
                 String votedElectionId = (parts.length >= 8) ? parts[7] : "";
-                voters.add(new Voter(voterId, name, department, username, password, eligible, hasVoted, votedElectionId));
+                voters.add(
+                        new Voter(voterId, name, department, username, password, eligible, hasVoted, votedElectionId));
             }
         } catch (IOException e) {
             System.err.println("Error loading voters: " + e.getMessage());
@@ -253,8 +269,7 @@ public final class FileManager {
                         sanitize(voter.getPassword()),
                         String.valueOf(voter.isEligible()),
                         String.valueOf(voter.hasVoted()),
-                        sanitize(voter.getVotedElectionId())
-                );
+                        sanitize(voter.getVotedElectionId()));
                 bw.write(line);
                 bw.newLine();
             }
@@ -281,20 +296,59 @@ public final class FileManager {
         return saveVoters(voters);
     }
 
+    public synchronized boolean setVoterEligibility(String voterId, boolean eligible) {
+        if (voterId == null || voterId.trim().isEmpty()) {
+            return false;
+        }
+        List<Voter> voters = loadVoters();
+        boolean found = false;
+        for (Voter v : voters) {
+            if (v.getVoterId().equalsIgnoreCase(voterId.trim())) {
+                v.setEligible(eligible);
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            saveVoters(voters);
+        }
+        return found;
+    }
+
+    public synchronized boolean deleteVoter(String voterId) {
+        if (voterId == null || voterId.trim().isEmpty()) {
+            return false;
+        }
+        List<Voter> voters = loadVoters();
+        boolean removed = voters.removeIf(v -> v.getVoterId().equalsIgnoreCase(voterId.trim()));
+        if (removed) {
+            saveVoters(voters);
+            // Cascade: remove votes associated with this voter
+            List<Vote> votes = loadVotes();
+            boolean votesChanged = votes.removeIf(v -> v.getVoterId().equalsIgnoreCase(voterId.trim()));
+            if (votesChanged) {
+                saveVotes(votes);
+            }
+        }
+        return removed;
+    }
+
     // ==========================================
     // CANDIDATES
     // ==========================================
     public synchronized List<Candidate> loadCandidates() {
         List<Candidate> candidates = new ArrayList<>();
         File file = new File(candidatesFile);
-        if (!file.exists()) return candidates;
+        if (!file.exists())
+            return candidates;
 
         int skipped = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
+                if (line.isEmpty() || line.startsWith("#"))
+                    continue;
                 String[] parts = line.split(DELIMITER, -1);
                 if (parts.length < 4) {
                     skipped++;
@@ -325,8 +379,7 @@ public final class FileManager {
                         sanitize(candidate.getName()),
                         sanitize(candidate.getDepartment()),
                         sanitize(candidate.getElectionId()),
-                        sanitize(candidate.getSlogan())
-                );
+                        sanitize(candidate.getSlogan()));
                 bw.write(line);
                 bw.newLine();
             }
@@ -343,20 +396,73 @@ public final class FileManager {
         return saveCandidates(candidates);
     }
 
+    public synchronized boolean updateCandidate(Candidate candidate) {
+        if (candidate == null || candidate.getCandidateId().trim().isEmpty()) {
+            return false;
+        }
+        List<Candidate> candidates = loadCandidates();
+        boolean found = false;
+        for (int i = 0; i < candidates.size(); i++) {
+            if (candidates.get(i).getCandidateId().equalsIgnoreCase(candidate.getCandidateId().trim())) {
+                candidates.set(i, candidate);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            candidates.add(candidate);
+        }
+        return saveCandidates(candidates);
+    }
+
+    public synchronized boolean removeCandidate(String candidateId) {
+        if (candidateId == null || candidateId.trim().isEmpty()) {
+            return false;
+        }
+        List<Candidate> candidates = loadCandidates();
+        boolean removed = candidates.removeIf(c -> c.getCandidateId().equalsIgnoreCase(candidateId.trim()));
+        if (removed) {
+            saveCandidates(candidates);
+            // Cascade: remove votes associated with this candidate and reset affected voters
+            List<Vote> votes = loadVotes();
+            Set<String> affectedVoterIds = new HashSet<>();
+            for (Vote v : votes) {
+                if (v.getCandidateId().equalsIgnoreCase(candidateId.trim())) {
+                    affectedVoterIds.add(v.getVoterId());
+                }
+            }
+            if (!affectedVoterIds.isEmpty()) {
+                votes.removeIf(v -> v.getCandidateId().equalsIgnoreCase(candidateId.trim()));
+                saveVotes(votes);
+                List<Voter> voters = loadVoters();
+                for (Voter v : voters) {
+                    if (affectedVoterIds.contains(v.getVoterId())) {
+                        v.setHasVoted(false);
+                        v.setVotedElectionId("");
+                    }
+                }
+                saveVoters(voters);
+            }
+        }
+        return removed;
+    }
+
     // ==========================================
     // ELECTIONS
     // ==========================================
     public synchronized List<Election> loadElections() {
         List<Election> elections = new ArrayList<>();
         File file = new File(electionsFile);
-        if (!file.exists()) return elections;
+        if (!file.exists())
+            return elections;
 
         int skipped = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
+                if (line.isEmpty() || line.startsWith("#"))
+                    continue;
                 String[] parts = line.split(DELIMITER, -1);
                 if (parts.length < 6) {
                     skipped++;
@@ -385,7 +491,8 @@ public final class FileManager {
     public synchronized boolean saveElections(List<Election> elections) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(electionsFile))) {
             for (Election election : elections) {
-                String startStr = election.getStartTime() != null ? election.getStartTime().format(DATE_TIME_FORMATTER) : "";
+                String startStr = election.getStartTime() != null ? election.getStartTime().format(DATE_TIME_FORMATTER)
+                        : "";
                 String endStr = election.getEndTime() != null ? election.getEndTime().format(DATE_TIME_FORMATTER) : "";
                 String line = String.join(DELIMITER,
                         sanitize(election.getElectionId()),
@@ -393,8 +500,7 @@ public final class FileManager {
                         sanitize(election.getDescription()),
                         startStr,
                         endStr,
-                        election.getStatus().name()
-                );
+                        election.getStatus().name());
                 bw.write(line);
                 bw.newLine();
             }
@@ -456,14 +562,16 @@ public final class FileManager {
     public synchronized List<Vote> loadVotes() {
         List<Vote> votes = new ArrayList<>();
         File file = new File(votesFile);
-        if (!file.exists()) return votes;
+        if (!file.exists())
+            return votes;
 
         int skipped = 0;
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty() || line.startsWith("#")) continue;
+                if (line.isEmpty() || line.startsWith("#"))
+                    continue;
                 String[] parts = line.split(DELIMITER, -1);
                 if (parts.length < 5) {
                     skipped++;
@@ -500,8 +608,7 @@ public final class FileManager {
                         vote.getElectionId(),
                         vote.getCandidateId(),
                         vote.getVoterId(),
-                        timeStr
-                );
+                        timeStr);
                 bw.write(line);
                 bw.newLine();
             }
@@ -526,14 +633,16 @@ public final class FileManager {
      * Computes the SHA-256 cryptographic digest of a password.
      */
     public static String hashSHA256(String input) {
-        if (input == null) return "";
+        if (input == null)
+            return "";
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hash = md.digest(input.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
+                if (hex.length() == 1)
+                    hexString.append('0');
                 hexString.append(hex);
             }
             return hexString.toString();
@@ -641,8 +750,10 @@ public final class FileManager {
     }
 
     /**
-     * Removes the field delimiter and line breaks from a value before it is written.
-     * Without this guard, a name or slogan containing ';' would shift every following
+     * Removes the field delimiter and line breaks from a value before it is
+     * written.
+     * Without this guard, a name or slogan containing ';' would shift every
+     * following
      * column of the record and silently corrupt the stored ballot/election data.
      */
     private static String sanitize(String value) {
@@ -653,7 +764,8 @@ public final class FileManager {
     }
 
     /**
-     * Parses an election status token defensively (returns null instead of throwing).
+     * Parses an election status token defensively (returns null instead of
+     * throwing).
      */
     private static ElectionStatus parseStatus(String text) {
         if (text == null || text.trim().isEmpty()) {
@@ -662,7 +774,7 @@ public final class FileManager {
         try {
             return ElectionStatus.valueOf(text.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            e.getClass();
+            assert e != null;
             return null;
         }
     }
@@ -674,11 +786,11 @@ public final class FileManager {
         try {
             return LocalDateTime.parse(text, DATE_TIME_FORMATTER);
         } catch (DateTimeParseException e) {
-            e.getClass();
+            assert e != null;
             try {
                 return LocalDateTime.parse(text);
             } catch (Exception ignored) {
-                ignored.getClass();
+                assert ignored != null;
                 return null;
             }
         }

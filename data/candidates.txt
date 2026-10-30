@@ -1,4 +1,3 @@
 C001;Arjun Sharma;Computer Science;E001;Better Campus Wi-Fi & Tech Labs
 C002;Priya Mehta;Information Technology;E001;Transparent Student Representation
 C003;Rahul Verma;Electronics & Comm.;E001;Sports & Cultural Fest Upgrades
-C004;Ansh Chaouhan;Computer Application;E001;Jai Bhawani

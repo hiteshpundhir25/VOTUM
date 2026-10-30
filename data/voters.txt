@@ -3,4 +3,3 @@ V002;Ananya Singh;Information Technology;voter2;voter123;true;false;
 V003;Rohan Nair;Mechanical Engg;voter3;voter123;true;false;
 V004;Sneha Patel;Electronics & Comm.;voter4;voter123;true;false;
 V005;Dev Sharma;Computer Science;voter5;voter123;false;false;
-V006;Hitesh Pundhir;Computer Science;voter6;12345;true;true;E001

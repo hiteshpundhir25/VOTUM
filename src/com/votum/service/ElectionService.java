@@ -220,6 +220,79 @@ public class ElectionService {
     }
 
     /**
+     * Removes/disqualifies a candidate from an election, purges any cast ballots,
+     * resets affected voter states, and records an audit log entry.
+     */
+    public boolean removeCandidate(String candidateId) throws InvalidElectionException {
+        if (candidateId == null || candidateId.trim().isEmpty()) {
+            throw new InvalidElectionException("Candidate ID cannot be blank.");
+        }
+        Candidate target = null;
+        for (Candidate c : fileManager.loadCandidates()) {
+            if (c.getCandidateId().equalsIgnoreCase(candidateId.trim())) {
+                target = c;
+                break;
+            }
+        }
+        if (target == null) {
+            throw new InvalidElectionException("Candidate not found with ID: " + candidateId);
+        }
+
+        boolean removed = fileManager.removeCandidate(candidateId.trim());
+        if (removed) {
+            auditLogger.log("Candidate removed", "ID: " + target.getCandidateId() + " | Name: "
+                    + target.getName() + " | Election: " + target.getElectionId() + " | Ballots purged.");
+        }
+        return removed;
+    }
+
+    /**
+     * Updates an existing candidate's profile (name, department, slogan) and logs the audit event.
+     */
+    public Candidate updateCandidate(String candidateId, String name, String department,
+                                     String electionId, String slogan) throws InvalidElectionException {
+        if (candidateId == null || candidateId.trim().isEmpty()) {
+            throw new InvalidElectionException("Candidate ID cannot be blank.");
+        }
+        if (name == null || name.trim().isEmpty()) {
+            throw new InvalidElectionException("Candidate Name cannot be blank.");
+        }
+        if (department == null || department.trim().isEmpty()) {
+            throw new InvalidElectionException("Department cannot be blank.");
+        }
+        if (electionId == null || electionId.trim().isEmpty()) {
+            throw new InvalidElectionException("Election ID cannot be blank.");
+        }
+
+        Candidate existing = null;
+        for (Candidate c : fileManager.loadCandidates()) {
+            if (c.getCandidateId().equalsIgnoreCase(candidateId.trim())) {
+                existing = c;
+                break;
+            }
+        }
+        if (existing == null) {
+            throw new InvalidElectionException("Candidate not found with ID: " + candidateId);
+        }
+
+        Candidate updated = new Candidate(
+                candidateId.trim(),
+                name.trim(),
+                department.trim(),
+                electionId.trim(),
+                slogan == null ? "" : slogan.trim()
+        );
+
+        if (!fileManager.updateCandidate(updated)) {
+            throw new InvalidElectionException("Candidate '" + candidateId + "' could not be updated in storage. Please retry.");
+        }
+
+        auditLogger.log("Candidate updated", "ID: " + updated.getCandidateId() + " | Name: " + updated.getName()
+                + " | Election: " + updated.getElectionId() + " | Slogan: " + updated.getSlogan());
+        return updated;
+    }
+
+    /**
      * Registers a new eligible student voter.
      */
     public Voter addVoter(String voterId, String name, String department,
@@ -279,5 +352,57 @@ public class ElectionService {
 
     public List<Voter> getAllVoters() {
         return fileManager.loadVoters();
+    }
+
+    /**
+     * Updates the eligibility of a registered student voter and logs the audit event.
+     */
+    public boolean setVoterEligibility(String voterId, boolean eligible) throws InvalidElectionException {
+        if (voterId == null || voterId.trim().isEmpty()) {
+            throw new InvalidElectionException("Voter ID cannot be blank.");
+        }
+        Voter target = null;
+        for (Voter v : fileManager.loadVoters()) {
+            if (v.getVoterId().equalsIgnoreCase(voterId.trim())) {
+                target = v;
+                break;
+            }
+        }
+        if (target == null) {
+            throw new InvalidElectionException("Voter not found with ID: " + voterId);
+        }
+
+        boolean updated = fileManager.setVoterEligibility(voterId.trim(), eligible);
+        if (updated) {
+            auditLogger.log("Voter eligibility updated", "ID: " + target.getVoterId() + " | Name: "
+                    + target.getName() + " | Eligible: " + eligible);
+        }
+        return updated;
+    }
+
+    /**
+     * Permanently deletes a voter from the voter roll, cascades ballot removal, and logs the audit event.
+     */
+    public boolean deleteVoter(String voterId) throws InvalidElectionException {
+        if (voterId == null || voterId.trim().isEmpty()) {
+            throw new InvalidElectionException("Voter ID cannot be blank.");
+        }
+        Voter target = null;
+        for (Voter v : fileManager.loadVoters()) {
+            if (v.getVoterId().equalsIgnoreCase(voterId.trim())) {
+                target = v;
+                break;
+            }
+        }
+        if (target == null) {
+            throw new InvalidElectionException("Voter not found with ID: " + voterId);
+        }
+
+        boolean deleted = fileManager.deleteVoter(voterId.trim());
+        if (deleted) {
+            auditLogger.log("Voter record deleted", "ID: " + target.getVoterId() + " | Name: "
+                    + target.getName() + " | Username: " + target.getUsername() + " | Ballots purged.");
+        }
+        return deleted;
     }
 }

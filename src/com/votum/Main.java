@@ -16,7 +16,8 @@ public class Main {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
-            ignored.getClass();
+            assert ignored != null;
+            /* use default look and feel */
         }
 
         // Initialize Storage & Audit Logger
