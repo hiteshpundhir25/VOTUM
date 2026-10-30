@@ -21,7 +21,6 @@ import java.util.Locale;
  * window validation, and the non-auditing result preview used by the live dashboard.
  * Everything runs in an isolated directory without touching production data.
  */
-@SuppressWarnings("unused")
 public class VotumTestSuite {
     private static final String TEST_DATA_DIR = "data_test";
     private static int passedCount = 0;
@@ -157,6 +156,7 @@ public class VotumTestSuite {
             ctx.authService.login("admin", "wrongpassword");
             fail("Test 2: Invalid Login", "Should have thrown InvalidLoginException for wrong password");
         } catch (InvalidLoginException e) {
+            assert e != null;
             pass("Test 2: Invalid Login correctly rejected");
         } catch (Exception e) {
             fail("Test 2: Invalid Login", "Unexpected exception type: " + e.getClass().getName());
@@ -197,6 +197,7 @@ public class VotumTestSuite {
                     fail("Test 4: Election Creation", "Should reject end time before start time");
                     return;
                 } catch (InvalidElectionException expected) {
+                    assert expected != null;
                     // expected
                 }
                 pass("Test 4: Election Creation & Start/End time validation");
@@ -278,6 +279,7 @@ public class VotumTestSuite {
             ctx.votingService.castVote("V001", "E001", "C002");
             fail("Test 8: Duplicate Vote", "Should have thrown DuplicateVoteException on second vote");
         } catch (DuplicateVoteException e) {
+            assert e != null;
             pass("Test 8: Duplicate Vote correctly blocked with DuplicateVoteException");
         } catch (Exception e) {
             fail("Test 8: Duplicate Vote", "Wrong exception thrown: " + e.getClass().getName());
@@ -293,6 +295,7 @@ public class VotumTestSuite {
             ctx.votingService.castVote("V002", "E001", "NON_EXISTENT_CANDIDATE");
             fail("Test 9: Invalid Candidate", "Should have thrown InvalidCandidateException");
         } catch (InvalidCandidateException e) {
+            assert e != null;
             pass("Test 9: Invalid Candidate selection correctly rejected");
         } catch (Exception e) {
             fail("Test 9: Invalid Candidate", "Wrong exception thrown: " + e.getClass().getName());
@@ -316,6 +319,7 @@ public class VotumTestSuite {
             ctx.votingService.castVote("V002", "FUT-01", "FC-01");
             fail("Test 10: Voting Before Start", "Should have rejected vote before start time");
         } catch (ElectionClosedException e) {
+            assert e != null;
             pass("Test 10: Voting before start time rejected with ElectionClosedException");
         } catch (Exception e) {
             fail("Test 10: Voting Before Start", "Wrong exception: " + e.getClass().getName());
@@ -339,6 +343,7 @@ public class VotumTestSuite {
             ctx.votingService.castVote("V002", "PAST-01", "PC-01");
             fail("Test 11: Voting After End", "Should have rejected vote after end time");
         } catch (ElectionClosedException e) {
+            assert e != null;
             pass("Test 11: Voting after end time rejected with ElectionClosedException");
         } catch (Exception e) {
             fail("Test 11: Voting After End", "Wrong exception: " + e.getClass().getName());
@@ -505,6 +510,7 @@ public class VotumTestSuite {
             try {
                 ctx.votingService.castVote("V001", "E001", "C002");
             } catch (DuplicateVoteException expected) {
+                assert expected != null;
                 blockedInFirst = true;
             }
 
@@ -512,6 +518,7 @@ public class VotumTestSuite {
             try {
                 ctx.votingService.castVote("V001", "E002", "C101");
             } catch (DuplicateVoteException expected) {
+                assert expected != null;
                 blockedInSecond = true;
             }
 
@@ -540,6 +547,7 @@ public class VotumTestSuite {
             try {
                 ctx.electionService.addVoter("V900", "Duplicate Officer", "CSE", "admin", "secret123", true);
             } catch (InvalidElectionException expected) {
+                assert expected != null;
                 rejected = true;
             }
 
@@ -649,6 +657,7 @@ public class VotumTestSuite {
             try {
                 ctx.votingService.castVoteAt("V003", "WIN-01", "WC-01", end.plusSeconds(1));
             } catch (ElectionClosedException expected) {
+                assert expected != null;
                 tooLateRejected = true;
             }
 
@@ -656,6 +665,7 @@ public class VotumTestSuite {
             try {
                 ctx.votingService.castVoteAt("V003", "WIN-01", "WC-01", start.minusSeconds(1));
             } catch (ElectionClosedException expected) {
+                assert expected != null;
                 tooEarlyRejected = true;
             }
 
@@ -725,6 +735,7 @@ public class VotumTestSuite {
             try {
                 ctx.electionService.createElection("E002", "Duplicate Title", "Dup", now, now.plusHours(1));
             } catch (InvalidElectionException expected) {
+                assert expected != null;
                 duplicateRejected = true;
             }
 
@@ -737,6 +748,7 @@ public class VotumTestSuite {
             try {
                 ctx.votingService.castVote("V003", "E002", "C101");
             } catch (ElectionClosedException expected) {
+                assert expected != null;
                 closedRejectsVotes = true;
             }
 

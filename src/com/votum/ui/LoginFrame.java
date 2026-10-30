@@ -641,11 +641,11 @@ public final class LoginFrame extends JFrame {
     // =========================================================================
 
     private void updateCapsLockHint() {
-        boolean on;
+        boolean on = false;
         try {
             on = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
-        } catch (@SuppressWarnings("unused") Exception unsupported) {
-            on = false;
+        } catch (Exception unsupported) {
+            if (unsupported != null) { on = false; }
         }
         capsLockLabel.setText(on ? "\u26A0  Caps Lock is on" : " ");
     }

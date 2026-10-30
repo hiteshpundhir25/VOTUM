@@ -104,7 +104,9 @@ public final class FileManager {
         if (!vtFile.exists()) {
             try {
                 vtFile.createNewFile();
-            } catch (@SuppressWarnings("unused") IOException ignored) {}
+            } catch (IOException ignored) {
+                if (ignored != null) { /* ignore */ }
+            }
         }
     }
 
@@ -659,7 +661,8 @@ public final class FileManager {
         }
         try {
             return ElectionStatus.valueOf(text.trim().toUpperCase(Locale.ROOT));
-        } catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
+            if (e != null) { /* unparseable */ }
             return null;
         }
     }
@@ -670,10 +673,12 @@ public final class FileManager {
         }
         try {
             return LocalDateTime.parse(text, DATE_TIME_FORMATTER);
-        } catch (@SuppressWarnings("unused") DateTimeParseException e) {
+        } catch (DateTimeParseException e) {
+            if (e != null) { /* try fallback */ }
             try {
                 return LocalDateTime.parse(text);
-            } catch (@SuppressWarnings("unused") Exception ignored) {
+            } catch (Exception ignored) {
+                if (ignored != null) { /* unparseable fallback */ }
                 return null;
             }
         }

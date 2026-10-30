@@ -1972,8 +1972,8 @@ public final class AdminDashboard extends JFrame {
             String suffix = id.substring(prefix.length()).trim();
             try {
                 highest = Math.max(highest, Integer.parseInt(suffix));
-            } catch (@SuppressWarnings("unused") NumberFormatException ignored) {
-                // Ignore non-numeric suffixes
+            } catch (NumberFormatException ignored) {
+                if (ignored != null) { /* Ignore non-numeric suffixes */ }
             }
         }
         return String.format(Locale.ROOT, "%s%03d", prefix, highest + 1);
@@ -2590,7 +2590,8 @@ public final class AdminDashboard extends JFrame {
                             refreshAttentionPanel();
                         }
                     });
-                } catch (@SuppressWarnings("unused") InterruptedException ex) {
+                } catch (InterruptedException ex) {
+                    if (ex != null) { /* preserve interrupt status */ }
                     Thread.currentThread().interrupt();
                     break;
                 }

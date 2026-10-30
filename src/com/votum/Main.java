@@ -11,13 +11,12 @@ import javax.swing.*;
  * Initializes storage, services, Look & Feel, and launches the login window.
  */
 public class Main {
-    @SuppressWarnings("unused")
     public static void main(String[] args) {
         // Set cross-platform / system Look and Feel for clean appearance
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
-            // Falls back smoothly to default Swing look
+            if (ignored != null) { /* Falls back smoothly to default Swing look */ }
         }
 
         // Initialize Storage & Audit Logger
