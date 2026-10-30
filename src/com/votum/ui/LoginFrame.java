@@ -12,6 +12,7 @@ import com.votum.storage.AuditLogger;
 import com.votum.storage.FileManager;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -32,16 +33,22 @@ import java.util.Locale;
 /**
  * The VOTUM front page and authentication portal.
  *
- * <p>Designed with an authoritative broadsheet editorial aesthetic: an edge-to-edge
- * institutional masthead across the top, a double rule border, a left-hand civic
- * integrity exhibit featuring an animated geometric electoral compass, security pillars,
- * and an aligned credential authentication terminal with quick-fill profile cards.</p>
+ * <p>
+ * Designed with an authoritative broadsheet editorial aesthetic: an
+ * edge-to-edge
+ * institutional masthead across the top, a double rule border, a left-hand
+ * civic
+ * integrity exhibit featuring an animated geometric electoral compass, security
+ * pillars,
+ * and an aligned credential authentication terminal with quick-fill profile
+ * cards.
+ * </p>
  */
 public final class LoginFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
-    private static final DateTimeFormatter EDITION_DATE =
-            DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.ENGLISH);
+    private static final DateTimeFormatter EDITION_DATE = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy",
+            Locale.ENGLISH);
 
     private final transient FileManager fileManager;
     private final transient AuditLogger auditLogger;
@@ -63,7 +70,7 @@ public final class LoginFrame extends JFrame {
     private CivicSealAnimationPanel sealAnimationPanel;
 
     public LoginFrame(FileManager fileManager, AuditLogger auditLogger, ElectionService electionService,
-                      VotingService votingService, ResultService resultService, AuthenticationService authService) {
+            VotingService votingService, ResultService resultService, AuthenticationService authService) {
         this.fileManager = fileManager;
         this.auditLogger = auditLogger;
         this.electionService = electionService;
@@ -96,7 +103,8 @@ public final class LoginFrame extends JFrame {
 
         page.add(buildMasthead(), BorderLayout.NORTH);
 
-        // Body: Two balanced columns grouped in a centered measure to eliminate disalignment
+        // Body: Two balanced columns grouped in a centered measure to eliminate
+        // disalignment
         JPanel body = new JPanel(new GridBagLayout());
         body.setOpaque(false);
 
@@ -119,7 +127,8 @@ public final class LoginFrame extends JFrame {
         gbc.insets = new Insets(0, 24, 0, 0);
         body.add(buildSignInTerminal(), gbc);
 
-        // CenteredPage (1260px) groups the left showcase and right card cleanly in the middle of any display
+        // CenteredPage (1260px) groups the left showcase and right card cleanly in the
+        // middle of any display
         page.add(new UITheme.CenteredPage(body, 1260), BorderLayout.CENTER);
 
         // Responsive scroll wrapper ensuring full adaptive scaling
@@ -130,8 +139,7 @@ public final class LoginFrame extends JFrame {
         getRootPane().registerKeyboardAction(
                 e -> handleExitApplication(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
-                JComponent.WHEN_IN_FOCUSED_WINDOW
-        );
+                JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -148,7 +156,9 @@ public final class LoginFrame extends JFrame {
         });
     }
 
-    /** Masthead, edition line and the double rule that opens the page edge-to-edge. */
+    /**
+     * Masthead, edition line and the double rule that opens the page edge-to-edge.
+     */
     private JPanel buildMasthead() {
         JPanel block = new JPanel(new BorderLayout(0, 14));
         block.setBackground(UITheme.PAPER);
@@ -200,7 +210,8 @@ public final class LoginFrame extends JFrame {
         row.add(titleBlock, BorderLayout.WEST);
         row.add(meta, BorderLayout.EAST);
 
-        // Heavy masthead double rule: stretches 100% from under VOTUM all the way to the right
+        // Heavy masthead double rule: stretches 100% from under VOTUM all the way to
+        // the right
         JPanel rulesPanel = new JPanel();
         rulesPanel.setLayout(new BoxLayout(rulesPanel, BoxLayout.Y_AXIS));
         rulesPanel.setOpaque(false);
@@ -213,14 +224,16 @@ public final class LoginFrame extends JFrame {
         return block;
     }
 
-    /** The colophon line that closes the page with edge-to-edge anchor and cleaned items. */
+    /**
+     * The colophon line that closes the page with edge-to-edge anchor and cleaned
+     * items.
+     */
     private JPanel buildColophon() {
         JPanel footer = new JPanel(new BorderLayout(16, 0));
         footer.setBackground(UITheme.PAPER);
         footer.setBorder(new CompoundBorder(
                 new MatteBorder(1, 0, 0, 0, UITheme.RULE),
-                new EmptyBorder(10, 48, 10, 48)
-        ));
+                new EmptyBorder(10, 48, 10, 48)));
 
         // Cleaned left kicker (CSC2104 removed as requested)
         JLabel left = UITheme.createKicker("VOTUM DIGITAL CAMPUS ELECTION MANAGEMENT SYSTEM");
@@ -263,13 +276,15 @@ public final class LoginFrame extends JFrame {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        // Matching top padding of 26px to align perfectly with the right card's internal content
+        // Matching top padding of 26px to align perfectly with the right card's
+        // internal content
         panel.setBorder(new EmptyBorder(26, 0, 0, 0));
 
         JLabel kicker = UITheme.createKicker("INSTITUTIONAL ELECTION DESK \u00B7 DEMOCRATIC INFRASTRUCTURE");
         kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel title = new JLabel("<html>Democracy in Action.<br><span style='color:#DC2626;'>Verified by Design.</span></html>");
+        JLabel title = new JLabel(
+                "<html>Democracy in Action.<br><span style='color:#DC2626;'>Verified by Design.</span></html>");
         title.setFont(new Font(UITheme.DISPLAY_FONT_FAMILY, Font.BOLD, 32));
         title.setForeground(UITheme.INK);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -320,16 +335,13 @@ public final class LoginFrame extends JFrame {
 
         container.add(createGuaranteeCard(
                 "TAMPER-EVIDENT AUDIT",
-                "Every cast ballot is appended to chronological disk logs in real time."
-        ));
+                "Every cast ballot is appended to chronological disk logs in real time."));
         container.add(createGuaranteeCard(
                 "STRICT WINDOW LOCK",
-                "Voting locks automatically at scheduled deadlines with zero leakage."
-        ));
+                "Voting locks automatically at scheduled deadlines with zero leakage."));
         container.add(createGuaranteeCard(
                 "ONE-STUDENT GUARANTEE",
-                "Duplicate voting attempts are caught and prevented with immediate rejection."
-        ));
+                "Duplicate voting attempts are caught and prevented with immediate rejection."));
 
         return container;
     }
@@ -340,8 +352,7 @@ public final class LoginFrame extends JFrame {
         card.setBackground(UITheme.PAPER_ALT);
         card.setBorder(new CompoundBorder(
                 new LineBorder(UITheme.RULE, 1),
-                new EmptyBorder(10, 12, 10, 12)
-        ));
+                new EmptyBorder(10, 12, 10, 12)));
 
         JLabel kicker = UITheme.createKicker(kickerText);
         kicker.setFont(new Font(UITheme.UI_FONT_FAMILY, Font.BOLD, 9));
@@ -379,8 +390,7 @@ public final class LoginFrame extends JFrame {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(new CompoundBorder(
                 new LineBorder(UITheme.RULE, 1),
-                new EmptyBorder(28, 32, 28, 32)
-        ));
+                new EmptyBorder(28, 32, 28, 32)));
         card.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel terminalKicker = UITheme.createKicker("OFFICIAL ACCESS DESK");
@@ -440,8 +450,7 @@ public final class LoginFrame extends JFrame {
         errorBanner.setBackground(UITheme.DANGER_TINT);
         errorBanner.setBorder(new CompoundBorder(
                 new MatteBorder(0, 3, 0, 0, UITheme.DANGER),
-                new EmptyBorder(10, 14, 10, 14)
-        ));
+                new EmptyBorder(10, 14, 10, 14)));
         errorBanner.setAlignmentX(Component.LEFT_ALIGNMENT);
         errorBanner.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         errorBanner.add(errorLabel, BorderLayout.CENTER);
@@ -618,8 +627,7 @@ public final class LoginFrame extends JFrame {
                 "Are you sure you want to exit the VOTUM application?",
                 "Confirm Exit",
                 JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE
-        );
+                JOptionPane.QUESTION_MESSAGE);
         if (confirm == JOptionPane.YES_OPTION) {
             if (sealAnimationPanel != null) {
                 sealAnimationPanel.stopAnimation();
@@ -685,8 +693,8 @@ public final class LoginFrame extends JFrame {
                     sealAnimationPanel.stopAnimation();
                 }
                 AdminDashboard adminDashboard = new AdminDashboard(
-                        (Admin) user, fileManager, auditLogger, electionService, votingService, resultService, authService
-                );
+                        (Admin) user, fileManager, auditLogger, electionService, votingService, resultService,
+                        authService);
                 adminDashboard.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 adminDashboard.setVisible(true);
                 dispose();
@@ -695,8 +703,8 @@ public final class LoginFrame extends JFrame {
                     sealAnimationPanel.stopAnimation();
                 }
                 VoterDashboard voterDashboard = new VoterDashboard(
-                        (Voter) user, fileManager, auditLogger, electionService, votingService, resultService, authService
-                );
+                        (Voter) user, fileManager, auditLogger, electionService, votingService, resultService,
+                        authService);
                 voterDashboard.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 voterDashboard.setVisible(true);
                 dispose();
@@ -742,8 +750,7 @@ public final class LoginFrame extends JFrame {
             setBackground(UITheme.PAPER_ALT);
             setBorder(new CompoundBorder(
                     new LineBorder(UITheme.RULE, 1),
-                    new EmptyBorder(14, 18, 14, 18)
-            ));
+                    new EmptyBorder(14, 18, 14, 18)));
 
             animTimer = new Timer(33, e -> {
                 // 1. Dual counter-rotating astrolabe dial rings
@@ -898,7 +905,7 @@ public final class LoginFrame extends JFrame {
             // Audit pulse: green concentric ripple from the slot upon ballot entry
             if (showAuditPulse) {
                 int rSlot = (int) (6 + 22 * auditPulseProg);
-                int alphaSlot = (int) (180 * (1.0f - auditPulseProg));
+                int alphaSlot = Math.max(0, Math.min(255, (int) (180 * (1.0f - auditPulseProg))));
                 g2.setColor(new Color(UITheme.SUCCESS.getRed(), UITheme.SUCCESS.getGreen(), UITheme.SUCCESS.getBlue(), alphaSlot));
                 g2.setStroke(new BasicStroke(1.5f));
                 g2.drawOval(cx - rSlot, cy - 4 - rSlot / 2, rSlot * 2, rSlot);
@@ -907,7 +914,8 @@ public final class LoginFrame extends JFrame {
             // 6. Real-time Status Caption with breathing green beacon
             g2.setFont(UITheme.FONT_SMALL_BOLD);
             float beaconAlpha = (float) ((Math.sin(rotationAngle * 0.1) + 1.0) / 2.0);
-            g2.setColor(new Color(UITheme.SUCCESS.getRed(), UITheme.SUCCESS.getGreen(), UITheme.SUCCESS.getBlue(), (int) (120 + 135 * beaconAlpha)));
+            int beaconAlphaInt = Math.max(0, Math.min(255, (int) (120 + 135 * beaconAlpha)));
+            g2.setColor(new Color(UITheme.SUCCESS.getRed(), UITheme.SUCCESS.getGreen(), UITheme.SUCCESS.getBlue(), beaconAlphaInt));
             g2.fillOval(cx - 148, h - 22, 7, 7);
 
             g2.setColor(UITheme.ACCENT);
