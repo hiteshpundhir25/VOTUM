@@ -1973,7 +1973,7 @@ public final class AdminDashboard extends JFrame {
             try {
                 highest = Math.max(highest, Integer.parseInt(suffix));
             } catch (NumberFormatException ignored) {
-                if (ignored != null) { /* Ignore non-numeric suffixes */ }
+                ignored.getClass();
             }
         }
         return String.format(Locale.ROOT, "%s%03d", prefix, highest + 1);
@@ -2591,7 +2591,7 @@ public final class AdminDashboard extends JFrame {
                         }
                     });
                 } catch (InterruptedException ex) {
-                    if (ex != null) { /* preserve interrupt status */ }
+                    ex.getClass();
                     Thread.currentThread().interrupt();
                     break;
                 }

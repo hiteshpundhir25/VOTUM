@@ -63,8 +63,10 @@ public final class UISmokeTestSuite {
             JPanel card = UITheme.createCardPanel();
             UITheme.StatCard statCard = UITheme.createStatCard("Test Metric", "42", "Subtext", UITheme.ACCENT);
             assertCondition(card != null && statCard != null, "Card containers and StatCard initialized");
-            statCard.setValue("99");
-            statCard.setSubtitle("Updated");
+            if (statCard != null) {
+                statCard.setValue("99");
+                statCard.setSubtitle("Updated");
+            }
 
             // Check 5: Status Badges
             JLabel badge = UITheme.createBadge("ACTIVE", UITheme.SUCCESS_TINT, UITheme.SUCCESS);
@@ -80,7 +82,7 @@ public final class UISmokeTestSuite {
 
             // Check 7: Horizontal Vote Bar
             UITheme.HorizontalVoteBar voteBar = new UITheme.HorizontalVoteBar("Candidate Name", 10, 20);
-            assertCondition(voteBar != null && voteBar.getPreferredSize().height >= 50, "HorizontalVoteBar constructed safely");
+            assertCondition(voteBar.getPreferredSize().height >= 50, "HorizontalVoteBar constructed safely");
 
             // Check 8: DateTimeInput validation
             assertCondition(DateTimeInput.validateWindow(null, null) != null, "DateTimeInput rejects null start/end");

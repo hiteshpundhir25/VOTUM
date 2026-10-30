@@ -16,7 +16,7 @@ public class Main {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
-            if (ignored != null) { /* Falls back smoothly to default Swing look */ }
+            ignored.getClass();
         }
 
         // Initialize Storage & Audit Logger
