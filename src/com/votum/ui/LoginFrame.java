@@ -35,8 +35,7 @@ import java.util.Locale;
  * <p>Designed with an authoritative broadsheet editorial aesthetic: an edge-to-edge
  * institutional masthead across the top, a double rule border, a left-hand civic
  * integrity exhibit featuring an animated geometric electoral compass, security pillars,
- * and an expanded right-hand credential authentication terminal with quick-fill
- * profile cards that gracefully fill full-screen viewports.</p>
+ * and an aligned credential authentication terminal with quick-fill profile cards.</p>
  */
 public final class LoginFrame extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -91,13 +90,13 @@ public final class LoginFrame extends JFrame {
         setLocationRelativeTo(null);
         getContentPane().setBackground(UITheme.PAPER);
 
-        JPanel page = new JPanel(new BorderLayout(0, 24));
+        JPanel page = new JPanel(new BorderLayout(0, 20));
         page.setBackground(UITheme.PAPER);
-        page.setBorder(new EmptyBorder(24, 52, 24, 52));
+        page.setBorder(new EmptyBorder(20, 48, 20, 48));
 
         page.add(buildMasthead(), BorderLayout.NORTH);
 
-        // Body: Two balanced columns utilizing the expanded full-screen viewport
+        // Body: Two balanced columns grouped in a centered measure to eliminate disalignment
         JPanel body = new JPanel(new GridBagLayout());
         body.setOpaque(false);
 
@@ -107,7 +106,8 @@ public final class LoginFrame extends JFrame {
         gbc.weightx = 0.52;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(0, 0, 0, 36);
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.insets = new Insets(0, 0, 0, 20);
         body.add(buildBrandAndCivicShowcase(), gbc);
 
         gbc.gridx = 1;
@@ -115,10 +115,12 @@ public final class LoginFrame extends JFrame {
         gbc.weightx = 0.48;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(0, 36, 0, 0);
+        gbc.anchor = GridBagConstraints.NORTH;
+        gbc.insets = new Insets(0, 20, 0, 0);
         body.add(buildSignInTerminal(), gbc);
 
-        page.add(body, BorderLayout.CENTER);
+        // CenteredPage (1260px) groups the left showcase and right card cleanly in the middle of any display
+        page.add(new UITheme.CenteredPage(body, 1260), BorderLayout.CENTER);
 
         // Responsive scroll wrapper ensuring full adaptive scaling
         add(UITheme.wrapContentScroll(page), BorderLayout.CENTER);
@@ -208,19 +210,21 @@ public final class LoginFrame extends JFrame {
         return block;
     }
 
-    /** The colophon line that closes the page with edge-to-edge anchor. */
+    /** The colophon line that closes the page with edge-to-edge anchor and cleaned items. */
     private JPanel buildColophon() {
         JPanel footer = new JPanel(new BorderLayout(16, 0));
         footer.setBackground(UITheme.PAPER);
         footer.setBorder(new CompoundBorder(
                 new MatteBorder(1, 0, 0, 0, UITheme.RULE),
-                new EmptyBorder(10, 52, 10, 52)
+                new EmptyBorder(10, 48, 10, 48)
         ));
 
-        JLabel left = UITheme.createKicker("VOTUM DIGITAL CAMPUS ELECTION MANAGEMENT SYSTEM \u00B7 CSC2104");
+        // Cleaned left kicker (CSC2104 removed as requested)
+        JLabel left = UITheme.createKicker("VOTUM DIGITAL CAMPUS ELECTION MANAGEMENT SYSTEM");
         left.setForeground(UITheme.MUTED);
 
-        JLabel center = new JLabel("SECURE KIOSK EXAM MODE ACTIVE  \u2022  PRESS ESC TO EXIT");
+        // Cleaned center helper (SECURE KIOSK EXAM MODE ACTIVE removed as requested)
+        JLabel center = new JLabel("PRESS ESC TO EXIT");
         center.setFont(UITheme.FONT_SMALL);
         center.setForeground(UITheme.FAINT);
         center.setHorizontalAlignment(SwingConstants.CENTER);
@@ -256,16 +260,18 @@ public final class LoginFrame extends JFrame {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setOpaque(false);
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // Matching top padding of 26px to align perfectly with the right card's internal content
+        panel.setBorder(new EmptyBorder(26, 0, 0, 0));
 
         JLabel kicker = UITheme.createKicker("INSTITUTIONAL ELECTION DESK \u00B7 DEMOCRATIC INFRASTRUCTURE");
         kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel title = new JLabel("<html>Democracy in Action.<br><span style='color:#DC2626;'>Verified by Design.</span></html>");
-        title.setFont(new Font(UITheme.DISPLAY_FONT_FAMILY, Font.BOLD, 34));
+        title.setFont(new Font(UITheme.DISPLAY_FONT_FAMILY, Font.BOLD, 32));
         title.setForeground(UITheme.INK);
         title.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel description = new JLabel("<html><div style='width:540px; line-height:1.55;'>"
+        JLabel description = new JLabel("<html><div style='width:520px; line-height:1.5;'>"
                 + "Welcome to VOTUM, the official democratic election portal. "
                 + "Engineered for student body governance with end-to-end auditability, "
                 + "clock-synchronized voting windows, and tamper-evident ballot verification."
@@ -274,11 +280,11 @@ public final class LoginFrame extends JFrame {
         description.setForeground(UITheme.MUTED);
         description.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Animated Civic Seal Canvas (Enlarged for full-screen impact)
+        // Animated Civic Seal Canvas (Refined with genuine voting drop cycle)
         sealAnimationPanel = new CivicSealAnimationPanel();
         sealAnimationPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        sealAnimationPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 300));
-        sealAnimationPanel.setPreferredSize(new Dimension(560, 300));
+        sealAnimationPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 260));
+        sealAnimationPanel.setPreferredSize(new Dimension(540, 260));
 
         // Three Security Guarantee Cards
         JPanel guarantees = buildGuaranteeCards();
@@ -289,25 +295,25 @@ public final class LoginFrame extends JFrame {
         archBadges.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         panel.add(kicker);
-        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(8));
         panel.add(title);
-        panel.add(Box.createVerticalStrut(12));
+        panel.add(Box.createVerticalStrut(10));
         panel.add(description);
-        panel.add(Box.createVerticalStrut(20));
+        panel.add(Box.createVerticalStrut(16));
         panel.add(sealAnimationPanel);
-        panel.add(Box.createVerticalStrut(20));
+        panel.add(Box.createVerticalStrut(16));
         panel.add(guarantees);
-        panel.add(Box.createVerticalStrut(18));
+        panel.add(Box.createVerticalStrut(14));
         panel.add(archBadges);
 
         return panel;
     }
 
     private JPanel buildGuaranteeCards() {
-        JPanel container = new JPanel(new GridLayout(1, 3, 14, 0));
+        JPanel container = new JPanel(new GridLayout(1, 3, 12, 0));
         container.setOpaque(false);
-        container.setMaximumSize(new Dimension(Integer.MAX_VALUE, 125));
-        container.setPreferredSize(new Dimension(560, 125));
+        container.setMaximumSize(new Dimension(Integer.MAX_VALUE, 115));
+        container.setPreferredSize(new Dimension(540, 115));
 
         container.add(createGuaranteeCard(
                 "TAMPER-EVIDENT AUDIT",
@@ -331,7 +337,7 @@ public final class LoginFrame extends JFrame {
         card.setBackground(UITheme.PAPER_ALT);
         card.setBorder(new CompoundBorder(
                 new LineBorder(UITheme.RULE, 1),
-                new EmptyBorder(12, 14, 12, 14)
+                new EmptyBorder(10, 12, 10, 12)
         ));
 
         JLabel kicker = UITheme.createKicker(kickerText);
@@ -339,19 +345,19 @@ public final class LoginFrame extends JFrame {
         kicker.setForeground(UITheme.ACCENT);
         kicker.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel desc = UITheme.createWrappedLabel(bodyText, UITheme.FONT_SMALL, UITheme.MUTED, 155);
+        JLabel desc = UITheme.createWrappedLabel(bodyText, UITheme.FONT_SMALL, UITheme.MUTED, 150);
         desc.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         card.add(kicker);
-        card.add(Box.createVerticalStrut(5));
+        card.add(Box.createVerticalStrut(4));
         card.add(desc);
         return card;
     }
 
     private JPanel buildArchitectureBadges() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         panel.setOpaque(false);
-        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
 
         panel.add(UITheme.createBadge("☕ Pure Java 17+", UITheme.PAPER_ALT, UITheme.INK));
         panel.add(UITheme.createBadge("📁 Flat-File Persistence", UITheme.PAPER_ALT, UITheme.MUTED));
@@ -370,7 +376,7 @@ public final class LoginFrame extends JFrame {
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(new CompoundBorder(
                 new LineBorder(UITheme.RULE, 1),
-                new EmptyBorder(34, 40, 34, 40)
+                new EmptyBorder(26, 32, 26, 32)
         ));
         card.setAlignmentX(Component.LEFT_ALIGNMENT);
 
@@ -392,18 +398,18 @@ public final class LoginFrame extends JFrame {
         card.add(terminalHeadline);
         card.add(Box.createVerticalStrut(4));
         card.add(terminalHint);
-        card.add(Box.createVerticalStrut(20));
+        card.add(Box.createVerticalStrut(18));
 
         card.add(buildCredentialsForm());
-        card.add(Box.createVerticalStrut(22));
-        card.add(UITheme.createRule(1, UITheme.RULE));
         card.add(Box.createVerticalStrut(18));
+        card.add(UITheme.createRule(1, UITheme.RULE));
+        card.add(Box.createVerticalStrut(14));
         card.add(buildDemoGrid());
-        card.add(Box.createVerticalStrut(16));
+        card.add(Box.createVerticalStrut(12));
 
         JPanel footnotePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
         footnotePanel.setOpaque(false);
-        JLabel footnote = new JLabel("🔒  All balloting sessions are private and verified against the campus registry");
+        JLabel footnote = new JLabel("🔒  Official registry verified  \u2022  Cryptographic audit stream");
         footnote.setFont(UITheme.FONT_SMALL);
         footnote.setForeground(UITheme.FAINT);
         footnotePanel.add(footnote);
@@ -442,8 +448,8 @@ public final class LoginFrame extends JFrame {
 
         usernameField = UITheme.createTextField(24);
         usernameField.setAlignmentX(Component.LEFT_ALIGNMENT);
-        usernameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-        usernameField.setPreferredSize(new Dimension(480, 46));
+        usernameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        usernameField.setPreferredSize(new Dimension(460, 44));
         userLabel.setLabelFor(usernameField);
 
         JLabel passLabel = new JLabel("Password");
@@ -467,8 +473,8 @@ public final class LoginFrame extends JFrame {
 
         passwordField = UITheme.createPasswordField(24);
         passwordField.setAlignmentX(Component.LEFT_ALIGNMENT);
-        passwordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
-        passwordField.setPreferredSize(new Dimension(480, 46));
+        passwordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        passwordField.setPreferredSize(new Dimension(460, 44));
         passLabel.setLabelFor(passwordField);
 
         capsLockLabel = new JLabel(" ");
@@ -503,8 +509,8 @@ public final class LoginFrame extends JFrame {
         loginButton = UITheme.createPrimaryButton("SIGN IN TO VOTUM \u2192");
         loginButton.setFont(UITheme.FONT_BUTTON);
         loginButton.setAlignmentX(Component.LEFT_ALIGNMENT);
-        loginButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
-        loginButton.setPreferredSize(new Dimension(480, 48));
+        loginButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+        loginButton.setPreferredSize(new Dimension(460, 46));
         loginButton.setMnemonic(KeyEvent.VK_L);
         loginButton.addActionListener((ActionEvent e) -> handleLogin());
 
@@ -564,10 +570,10 @@ public final class LoginFrame extends JFrame {
         header.setForeground(UITheme.MUTED);
         header.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel grid = new JPanel(new GridLayout(2, 2, 12, 10));
+        JPanel grid = new JPanel(new GridLayout(2, 2, 10, 8));
         grid.setOpaque(false);
         grid.setAlignmentX(Component.LEFT_ALIGNMENT);
-        grid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 86));
+        grid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
 
         grid.add(createDemoProfileButton("🏛 Admin Desk", "admin", "admin123", "Officer"));
         grid.add(createDemoProfileButton("🗳 Voter 1 (Eligible)", "voter1", "voter123", "CS Student"));
@@ -575,7 +581,7 @@ public final class LoginFrame extends JFrame {
         grid.add(createDemoProfileButton("🔒 Voter 5 (Ineligible)", "voter5", "voter567", "Voted"));
 
         panel.add(header);
-        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(8));
         panel.add(grid);
         return panel;
     }
@@ -711,7 +717,7 @@ public final class LoginFrame extends JFrame {
     }
 
     // =========================================================================
-    // ANIMATED CIVIC SEAL & DEMOCRATIC COMPASS CANVAS
+    // ENHANCED GENUINE CIVIC SEAL & DEMOCRATIC COMPASS ANIMATION CANVAS
     // =========================================================================
 
     private static final class CivicSealAnimationPanel extends JPanel {
@@ -719,7 +725,9 @@ public final class LoginFrame extends JFrame {
         private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
         private double rotationAngle = 0.0;
-        private double pulsePhase = 0.0;
+        private double innerAngle = 0.0;
+        private double sweepAngle = 0.0;
+        private double voteCycle = 0.0; // 0.0 to 1.0 vote-casting cycle
         private final Timer animTimer;
 
         public CivicSealAnimationPanel() {
@@ -731,13 +739,15 @@ public final class LoginFrame extends JFrame {
             ));
 
             animTimer = new Timer(33, e -> {
-                rotationAngle += 0.45;
-                if (rotationAngle >= 360.0) {
-                    rotationAngle -= 360.0;
-                }
-                pulsePhase += 0.055;
-                if (pulsePhase >= Math.PI * 2) {
-                    pulsePhase -= Math.PI * 2;
+                // 1. Dual counter-rotating astrolabe dial rings
+                rotationAngle = (rotationAngle + 0.35) % 360.0;
+                innerAngle = (innerAngle - 0.22 + 360.0) % 360.0;
+                sweepAngle = (sweepAngle + 0.95) % 360.0;
+
+                // 2. Genuine vote casting cycle (~3.5 seconds)
+                voteCycle += 0.0095;
+                if (voteCycle >= 1.0) {
+                    voteCycle = 0.0;
                 }
                 repaint();
             });
@@ -768,34 +778,28 @@ public final class LoginFrame extends JFrame {
             int cx = w / 2;
             int cy = h / 2 - 16;
 
-            // 1. Concentric pulse waves (transparency waves)
-            float pulse1 = (float) ((Math.sin(pulsePhase) + 1.0) / 2.0);
-            float pulse2 = (float) ((Math.sin(pulsePhase + Math.PI / 2) + 1.0) / 2.0);
-
-            g2.setColor(new Color(UITheme.ACCENT.getRed(), UITheme.ACCENT.getGreen(), UITheme.ACCENT.getBlue(), (int) (18 + 22 * pulse1)));
-            int rPulse1 = (int) (80 + 20 * pulse1);
-            g2.drawOval(cx - rPulse1, cy - rPulse1, rPulse1 * 2, rPulse1 * 2);
-
-            g2.setColor(new Color(UITheme.INK.getRed(), UITheme.INK.getGreen(), UITheme.INK.getBlue(), (int) (14 + 18 * pulse2)));
-            int rPulse2 = (int) (96 + 18 * pulse2);
-            g2.drawOval(cx - rPulse2, cy - rPulse2, rPulse2 * 2, rPulse2 * 2);
-
-            // 2. Fixed Outer Hairline Ring
+            // 1. Fixed Outer Hairline Ring
             g2.setColor(UITheme.RULE);
             g2.setStroke(new BasicStroke(1.2f));
-            g2.drawOval(cx - 76, cy - 76, 152, 152);
+            g2.drawOval(cx - 78, cy - 78, 156, 156);
 
-            // 3. Inner Dotted Ring
-            g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{3.0f, 4.0f}, 0.0f));
-            g2.drawOval(cx - 64, cy - 64, 128, 128);
+            // 2. Soft Orbiting Audit Scanner Sweep
+            double sweepRad = Math.toRadians(sweepAngle);
+            int sweepX = cx + (int) (Math.cos(sweepRad) * 78);
+            int sweepY = cy + (int) (Math.sin(sweepRad) * 78);
+            g2.setColor(new Color(UITheme.ACCENT.getRed(), UITheme.ACCENT.getGreen(), UITheme.ACCENT.getBlue(), 35));
+            g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g2.drawArc(cx - 78, cy - 78, 156, 156, (int) -sweepAngle, 30);
+            g2.setColor(UITheme.ACCENT);
+            g2.fillOval(sweepX - 2, sweepY - 2, 4, 4);
 
-            // 4. Rotating Integrity Compass Ticks (36 radial marks)
+            // 3. Rotating Outer Compass Ticks (36 radial marks, clockwise)
             g2.setStroke(new BasicStroke(1.0f));
-            double rad = Math.toRadians(rotationAngle);
+            double rad1 = Math.toRadians(rotationAngle);
             for (int i = 0; i < 36; i++) {
-                double tickAngle = rad + (i * Math.PI / 18);
-                int innerR = (i % 9 == 0) ? 66 : 70;
-                int outerR = 76;
+                double tickAngle = rad1 + (i * Math.PI / 18);
+                int innerR = (i % 9 == 0) ? 68 : 72;
+                int outerR = 78;
                 int x1 = cx + (int) (Math.cos(tickAngle) * innerR);
                 int y1 = cy + (int) (Math.sin(tickAngle) * innerR);
                 int x2 = cx + (int) (Math.cos(tickAngle) * outerR);
@@ -805,41 +809,104 @@ public final class LoginFrame extends JFrame {
                 g2.drawLine(x1, y1, x2, y2);
             }
 
-            // 5. Stylized Central Emblem (Parchment Circle + Ballot Box + Floating Ballot)
+            // 4. Counter-Rotating Inner Dial (12 diamond markers, counter-clockwise)
+            g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[]{3.0f, 4.0f}, 0.0f));
+            g2.setColor(UITheme.RULE_DARK);
+            g2.drawOval(cx - 64, cy - 64, 128, 128);
+
+            double rad2 = Math.toRadians(innerAngle);
+            g2.setStroke(new BasicStroke(1.0f));
+            for (int i = 0; i < 12; i++) {
+                double dotAngle = rad2 + (i * Math.PI / 6);
+                int r = 64;
+                int dx = cx + (int) (Math.cos(dotAngle) * r);
+                int dy = cy + (int) (Math.sin(dotAngle) * r);
+                g2.setColor((i % 3 == 0) ? UITheme.ACCENT : UITheme.RULE_DARK);
+                g2.fillRect(dx - 1, dy - 1, 3, 3);
+            }
+
+            // 5. Stylized Central Emblem: Medallion + Ballot Box + Genuine Vote Drop Cycle
             g2.setStroke(new BasicStroke(1.5f));
             g2.setColor(UITheme.PAPER);
-            g2.fillOval(cx - 40, cy - 40, 80, 80);
+            g2.fillOval(cx - 42, cy - 42, 84, 84);
             g2.setColor(UITheme.RULE);
-            g2.drawOval(cx - 40, cy - 40, 80, 80);
+            g2.drawOval(cx - 42, cy - 42, 84, 84);
 
-            // Ballot Box
+            // Compute authentic ballot casting physics:
+            // 0.00 - 0.35: Hovering above slot, ready
+            // 0.35 - 0.65: Drops smoothly into slot
+            // 0.65 - 0.78: In the box; slot emits verified audit ripple
+            // 0.78 - 1.00: New ballot smoothly fades in above
+            int ballotY;
+            float ballotAlpha = 1.0f;
+            boolean showAuditPulse = false;
+            float auditPulseProg = 0.0f;
+
+            if (voteCycle < 0.35) {
+                double bob = Math.sin(voteCycle / 0.35 * Math.PI) * 2.0;
+                ballotY = (int) (cy - 22 + bob);
+                ballotAlpha = 1.0f;
+            } else if (voteCycle < 0.65) {
+                double dropP = (voteCycle - 0.35) / 0.30;
+                ballotY = (int) (-22 + dropP * dropP * 24.0) + cy;
+                ballotAlpha = 1.0f;
+            } else if (voteCycle < 0.78) {
+                ballotY = cy + 2;
+                ballotAlpha = 0.0f;
+                showAuditPulse = true;
+                auditPulseProg = (float) ((voteCycle - 0.65) / 0.13);
+            } else {
+                ballotY = cy - 22;
+                ballotAlpha = (float) ((voteCycle - 0.78) / 0.22);
+            }
+
+            // Draw ballot paper (if visible)
+            if (ballotAlpha > 0.01f) {
+                Composite origComp = g2.getComposite();
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, Math.min(1.0f, ballotAlpha)));
+
+                g2.setColor(UITheme.PAPER_ALT);
+                g2.fillRect(cx - 9, ballotY, 18, 18);
+                g2.setColor(UITheme.ACCENT);
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.drawRect(cx - 9, ballotY, 18, 18);
+
+                // Checkmark on ballot
+                g2.drawLine(cx - 5, ballotY + 9, cx - 1, ballotY + 13);
+                g2.drawLine(cx - 1, ballotY + 13, cx + 6, ballotY + 6);
+
+                g2.setComposite(origComp);
+            }
+
+            // Draw ballot box body (drawn in front of descending ballot so it slips inside!)
             g2.setColor(UITheme.INK);
             g2.fillRoundRect(cx - 20, cy - 6, 40, 28, 5, 5);
 
-            // Box Slot
+            // Slot opening
             g2.setColor(UITheme.PAPER);
             g2.fillRect(cx - 11, cy - 6, 22, 3);
+            g2.setColor(UITheme.RULE_DARK);
+            g2.drawRect(cx - 11, cy - 6, 22, 3);
 
-            // Descending Ballot Paper (gentle floating oscillation)
-            double bob = Math.sin(pulsePhase * 1.4) * 4.0;
-            int ballotY = (int) (cy - 20 + bob);
-            g2.setColor(UITheme.PAPER_ALT);
-            g2.fillRect(cx - 9, ballotY, 18, 18);
-            g2.setColor(UITheme.ACCENT);
-            g2.drawRect(cx - 9, ballotY, 18, 18);
+            // Audit pulse: green concentric ripple from the slot upon ballot entry
+            if (showAuditPulse) {
+                int rSlot = (int) (6 + 22 * auditPulseProg);
+                int alphaSlot = (int) (180 * (1.0f - auditPulseProg));
+                g2.setColor(new Color(UITheme.SUCCESS.getRed(), UITheme.SUCCESS.getGreen(), UITheme.SUCCESS.getBlue(), alphaSlot));
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawOval(cx - rSlot, cy - 4 - rSlot / 2, rSlot * 2, rSlot);
+            }
 
-            // Checkmark on ballot
-            g2.drawLine(cx - 5, ballotY + 9, cx - 1, ballotY + 13);
-            g2.drawLine(cx - 1, ballotY + 13, cx + 6, ballotY + 6);
-
-            // 6. Real-time Status Caption below the seal
+            // 6. Real-time Status Caption with breathing green beacon
             g2.setFont(UITheme.FONT_SMALL_BOLD);
+            float beaconAlpha = (float) ((Math.sin(rotationAngle * 0.1) + 1.0) / 2.0);
+            g2.setColor(new Color(UITheme.SUCCESS.getRed(), UITheme.SUCCESS.getGreen(), UITheme.SUCCESS.getBlue(), (int) (120 + 135 * beaconAlpha)));
+            g2.fillOval(cx - 148, h - 22, 7, 7);
+
             g2.setColor(UITheme.ACCENT);
             String liveClock = LocalTime.now().format(TIME_FORMAT);
-            String caption = "\u25CF  LIVE BALLOT ENGINE ACTIVE  \u00B7  " + liveClock + "  \u00B7  AUDIT LOG SYNCHRONIZED";
-            FontMetrics fm = g2.getFontMetrics();
-            int captionW = fm.stringWidth(caption);
-            g2.drawString(caption, cx - (captionW / 2), h - 16);
+            String caption = "LIVE BALLOT ENGINE ACTIVE  \u00B7  " + liveClock + "  \u00B7  AUDIT LOG SYNCHRONIZED";
+            g2.drawString(caption, cx - 136, h - 16);
 
             g2.dispose();
         }
