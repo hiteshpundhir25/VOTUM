@@ -644,7 +644,7 @@ public final class LoginFrame extends JFrame {
         boolean on;
         try {
             on = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
-        } catch (Exception unsupported) {
+        } catch (@SuppressWarnings("unused") Exception unsupported) {
             on = false;
         }
         capsLockLabel.setText(on ? "\u26A0  Caps Lock is on" : " ");

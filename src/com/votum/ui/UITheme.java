@@ -159,7 +159,7 @@ public final class UITheme {
             for (String family : GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()) {
                 installed.add(family.toLowerCase(Locale.ROOT));
             }
-        } catch (Throwable headlessOrRestricted) {
+        } catch (@SuppressWarnings("unused") Throwable headlessOrRestricted) {
             return logicalFallback;
         }
         for (String candidate : candidates) {
@@ -198,7 +198,7 @@ public final class UITheme {
                 if (Boolean.TRUE.equals(platformSetting)) {
                     enabled = false;
                 }
-            } catch (Throwable ignored) {
+            } catch (@SuppressWarnings("unused") Throwable ignored) {
                 // Desktop properties are optional; keep the default.
             }
 
@@ -1119,7 +1119,7 @@ public final class UITheme {
                 from = Double.parseDouble(current.group(1));
                 to = Double.parseDouble(target.group(1));
                 decimals = decimalPlaces(target.group(1));
-            } catch (NumberFormatException malformed) {
+            } catch (@SuppressWarnings("unused") NumberFormatException malformed) {
                 valueLabel.setText(next);
                 return;
             }

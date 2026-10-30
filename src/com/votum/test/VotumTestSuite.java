@@ -21,6 +21,7 @@ import java.util.Locale;
  * window validation, and the non-auditing result preview used by the live dashboard.
  * Everything runs in an isolated directory without touching production data.
  */
+@SuppressWarnings("unused")
 public class VotumTestSuite {
     private static final String TEST_DATA_DIR = "data_test";
     private static int passedCount = 0;
