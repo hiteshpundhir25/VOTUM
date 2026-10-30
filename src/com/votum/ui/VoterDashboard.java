@@ -96,8 +96,8 @@ public final class VoterDashboard extends JFrame {
         setMinimumSize(new Dimension(920, 700));
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(0, 0, screenSize.width, screenSize.height);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(Frame.MAXIMIZED_BOTH);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(UITheme.PAPER);
         setLayout(new BorderLayout(0, 0));
@@ -866,7 +866,7 @@ public final class VoterDashboard extends JFrame {
         if (confirm == JOptionPane.YES_OPTION) {
             LoginFrame loginFrame = new LoginFrame(fileManager, auditLogger, electionService,
                     votingService, resultService, authService);
-            loginFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            loginFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
             loginFrame.setVisible(true);
             dispose();
         }

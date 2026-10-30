@@ -41,7 +41,7 @@ public class Main {
                     resultService,
                     authService
             );
-            loginFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            loginFrame.setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
             loginFrame.setVisible(true);
         });
     }

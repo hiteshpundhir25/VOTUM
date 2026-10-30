@@ -92,8 +92,8 @@ public final class LoginFrame extends JFrame {
         setMinimumSize(new Dimension(960, 700));
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(0, 0, screenSize.width, screenSize.height);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(Frame.MAXIMIZED_BOTH);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(UITheme.PAPER);
 
@@ -695,7 +695,7 @@ public final class LoginFrame extends JFrame {
                 AdminDashboard adminDashboard = new AdminDashboard(
                         (Admin) user, fileManager, auditLogger, electionService, votingService, resultService,
                         authService);
-                adminDashboard.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                adminDashboard.setExtendedState(Frame.MAXIMIZED_BOTH);
                 adminDashboard.setVisible(true);
                 dispose();
             } else if (user instanceof Voter) {
@@ -705,7 +705,7 @@ public final class LoginFrame extends JFrame {
                 VoterDashboard voterDashboard = new VoterDashboard(
                         (Voter) user, fileManager, auditLogger, electionService, votingService, resultService,
                         authService);
-                voterDashboard.setExtendedState(JFrame.MAXIMIZED_BOTH);
+                voterDashboard.setExtendedState(Frame.MAXIMIZED_BOTH);
                 voterDashboard.setVisible(true);
                 dispose();
             } else {

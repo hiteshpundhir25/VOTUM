@@ -1390,7 +1390,7 @@ public final class UITheme {
 
         JScrollPane scroll = new JScrollPane(host);
         scroll.setBorder(null);
-        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scroll.getVerticalScrollBar().setUI(new EditorialScrollBarUI());
         scroll.getVerticalScrollBar().setPreferredSize(new Dimension(10, 10));
         scroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -1519,7 +1519,6 @@ public final class UITheme {
         header.setReorderingAllowed(false);
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
 
-        JTableHeader tableHeader = table.getTableHeader();
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             private static final long serialVersionUID = 1L;
 
