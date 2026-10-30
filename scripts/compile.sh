@@ -12,6 +12,8 @@ echo "Compiling VOTUM Java Application..."
 echo "=========================================="
 
 mkdir -p bin
+# Ensure source directory only contains .java files (remove any stray bytecode)
+find src -name "*.class" -delete 2>/dev/null || true
 javac -Xlint:all -d bin $(find src -name "*.java")
 
 if [ $? -eq 0 ]; then

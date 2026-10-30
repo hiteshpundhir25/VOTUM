@@ -9,6 +9,8 @@ echo Compiling VOTUM Java Application...
 echo ==========================================
 
 if not exist "bin" mkdir bin
+rem Ensure source directory only contains .java files (remove any stray bytecode)
+del /s /q src\*.class >nul 2>&1
 dir /s /B src\*.java > sources.txt
 javac -Xlint:all -d bin @sources.txt
 set COMPILE_STATUS=%ERRORLEVEL%
