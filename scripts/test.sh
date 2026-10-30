@@ -12,7 +12,7 @@ echo "Compiling VOTUM and Verification Suites..."
 echo "=========================================="
 
 mkdir -p bin
-javac -Xlint:all -d bin $(find src -name "*.java")
+javac --release 17 -Xlint:all -d bin $(find src -name "*.java")
 
 echo "Running Domain Logic Verification Suite..."
 java -cp bin com.votum.test.VotumTestSuite

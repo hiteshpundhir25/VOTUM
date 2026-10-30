@@ -11,7 +11,7 @@ echo ==========================================
 if not exist "bin" mkdir bin
 del /s /q src\*.class >nul 2>&1
 dir /s /B src\*.java > sources.txt
-javac -d bin @sources.txt
+javac --release 17 -d bin @sources.txt
 set COMPILE_STATUS=%ERRORLEVEL%
 del sources.txt
 
