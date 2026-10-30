@@ -90,6 +90,7 @@ public final class UISmokeTestSuite {
             // Check 9: LoginFrame construction
             LoginFrame loginFrame = new LoginFrame(fileManager, auditLogger, electionService, votingService, resultService, authService);
             assertCondition(loginFrame.getTitle().contains("VOTUM"), "LoginFrame constructed with VOTUM title");
+            assertCondition(loginFrame.getExtendedState() == JFrame.MAXIMIZED_BOTH, "LoginFrame initialized in full-screen maximized mode");
             assertCondition(loginFrame.getMinimumSize().width >= 500, "LoginFrame enforces minimum window bounds");
             assertCondition(loginFrame.getRootPane().getDefaultButton() != null, "LoginFrame registers Enter default button");
             loginFrame.dispose();
@@ -97,12 +98,14 @@ public final class UISmokeTestSuite {
             // Check 10: AdminDashboard construction & panel reachability
             AdminDashboard adminDash = new AdminDashboard(testAdmin, fileManager, auditLogger, electionService, votingService, resultService, authService);
             assertCondition(adminDash.getTitle().contains("Administrator Control Center"), "AdminDashboard constructed with title");
+            assertCondition(adminDash.getExtendedState() == JFrame.MAXIMIZED_BOTH, "AdminDashboard initialized in full-screen maximized mode");
             assertCondition(adminDash.getMinimumSize().width >= 960, "AdminDashboard enforces desktop minimum size");
             adminDash.dispose();
 
             // Check 11: VoterDashboard construction
             VoterDashboard voterDash = new VoterDashboard(testVoter, fileManager, auditLogger, electionService, votingService, resultService, authService);
             assertCondition(voterDash.getTitle().contains("Student Voting Portal"), "VoterDashboard constructed with student title");
+            assertCondition(voterDash.getExtendedState() == JFrame.MAXIMIZED_BOTH, "VoterDashboard initialized in full-screen maximized mode");
             assertCondition(voterDash.getRootPane().getDefaultButton() != null, "VoterDashboard registers Enter default button");
             voterDash.dispose();
 

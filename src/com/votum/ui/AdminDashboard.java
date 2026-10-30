@@ -162,6 +162,7 @@ public final class AdminDashboard extends JFrame {
         setTitle("VOTUM — Administrator Control Center");
         setSize(1280, 830);
         setMinimumSize(new Dimension(1080, 680));
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(UITheme.PAPER);
@@ -197,10 +198,17 @@ public final class AdminDashboard extends JFrame {
         userLbl.setFont(UITheme.FONT_SMALL);
         userLbl.setForeground(UITheme.MUTED);
 
-        JButton logoutBtn = UITheme.createDangerButton("Logout");
+        JButton logoutBtn = UITheme.createSecondaryButton("Logout");
         logoutBtn.setFont(UITheme.FONT_SMALL_BOLD);
         logoutBtn.setBorder(new EmptyBorder(8, 14, 8, 14));
+        logoutBtn.setToolTipText("Return to the student/administrator login portal");
         logoutBtn.addActionListener(e -> handleLogout());
+
+        JButton exitBtn = UITheme.createDangerButton("✕ Exit Application");
+        exitBtn.setFont(UITheme.FONT_SMALL_BOLD);
+        exitBtn.setBorder(new EmptyBorder(8, 14, 8, 14));
+        exitBtn.setToolTipText("Close and exit the VOTUM system completely");
+        exitBtn.addActionListener(e -> handleExitApplication());
 
         JButton refreshTopBtn = UITheme.createSecondaryButton("\u21BB Refresh");
         refreshTopBtn.setFont(UITheme.FONT_SMALL_BOLD);
@@ -220,6 +228,7 @@ public final class AdminDashboard extends JFrame {
         rightUserPanel.add(refreshTopBtn);
         rightUserPanel.add(resetDemoBtn);
         rightUserPanel.add(logoutBtn);
+        rightUserPanel.add(exitBtn);
 
         topBar.add(brandPanel, BorderLayout.WEST);
         topBar.add(rightUserPanel, BorderLayout.EAST);
@@ -2062,8 +2071,22 @@ public final class AdminDashboard extends JFrame {
             LoginFrame loginFrame = new LoginFrame(
                     fileManager, auditLogger, electionService,
                     votingService, resultService, authService);
+            loginFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             loginFrame.setVisible(true);
             dispose();
+        }
+    }
+
+    private void handleExitApplication() {
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to exit the VOTUM application?",
+                "Confirm Exit",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (confirm == JOptionPane.YES_OPTION) {
+            System.exit(0);
         }
     }
 

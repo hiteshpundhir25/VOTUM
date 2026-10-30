@@ -92,6 +92,7 @@ public final class LoginFrame extends JFrame {
         setTitle("VOTUM — Digital Campus Election System");
         setSize(1120, 800);
         setMinimumSize(new Dimension(960, 700));
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         getContentPane().setBackground(UITheme.PAPER);
@@ -137,13 +138,38 @@ public final class LoginFrame extends JFrame {
         JLabel left = UITheme.createKicker("DIGITAL CAMPUS ELECTION SYSTEM");
         left.setForeground(UITheme.MUTED);
 
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
+        rightPanel.setOpaque(false);
+
         JLabel right = new JLabel("CAMPUS ELECTION AUTHORITY");
         right.setFont(UITheme.FONT_SMALL);
         right.setForeground(UITheme.FAINT);
 
+        JButton exitBtn = UITheme.createDangerButton("✕ Exit Application");
+        exitBtn.setFont(UITheme.FONT_SMALL_BOLD);
+        exitBtn.setBorder(new EmptyBorder(6, 14, 6, 14));
+        exitBtn.setToolTipText("Close and exit the VOTUM system completely");
+        exitBtn.addActionListener(e -> handleExitApplication());
+
+        rightPanel.add(right);
+        rightPanel.add(exitBtn);
+
         footer.add(left, BorderLayout.WEST);
-        footer.add(right, BorderLayout.EAST);
+        footer.add(rightPanel, BorderLayout.EAST);
         return footer;
+    }
+
+    private void handleExitApplication() {
+        int confirm = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to exit the VOTUM application?",
+                "Confirm Exit",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE
+        );
+        if (confirm == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
     }
 
     /** Masthead, edition line and the double rule that opens the page. */
@@ -619,12 +645,14 @@ public final class LoginFrame extends JFrame {
                 AdminDashboard adminDashboard = new AdminDashboard(
                         (Admin) user, fileManager, auditLogger, electionService, votingService, resultService, authService
                 );
+                adminDashboard.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 adminDashboard.setVisible(true);
                 dispose();
             } else if (user instanceof Voter) {
                 VoterDashboard voterDashboard = new VoterDashboard(
                         (Voter) user, fileManager, auditLogger, electionService, votingService, resultService, authService
                 );
+                voterDashboard.setExtendedState(JFrame.MAXIMIZED_BOTH);
                 voterDashboard.setVisible(true);
                 dispose();
             } else {
