@@ -160,6 +160,7 @@ public final class UITheme {
                 installed.add(family.toLowerCase(Locale.ROOT));
             }
         } catch (Throwable e) {
+            java.util.Objects.requireNonNull(e);
             // Headless server or restricted permissions: return the standard fallback font
             return logicalFallback;
         }
@@ -200,6 +201,7 @@ public final class UITheme {
                     enabled = false;
                 }
             } catch (Throwable e) {
+                java.util.Objects.requireNonNull(e);
                 // Desktop properties are optional; keep default if not supported
             }
 
@@ -1121,6 +1123,7 @@ public final class UITheme {
                 to = Double.parseDouble(target.group(1));
                 decimals = decimalPlaces(target.group(1));
             } catch (NumberFormatException e) {
+                java.util.Objects.requireNonNull(e);
                 // If value cannot be parsed numerically, show text as-is
                 valueLabel.setText(next);
                 return;

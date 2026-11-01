@@ -2053,6 +2053,7 @@ public final class AdminDashboard extends JFrame {
             try {
                 highest = Math.max(highest, Integer.parseInt(suffix));
             } catch (NumberFormatException e) {
+                java.util.Objects.requireNonNull(e);
                 // Skip non-numeric suffix (e.g. custom IDs) when auto-incrementing
             }
         }
@@ -3063,6 +3064,7 @@ public final class AdminDashboard extends JFrame {
                         }
                     });
                 } catch (InterruptedException ex) {
+                    java.util.Objects.requireNonNull(ex);
                     // Restore interrupt status and exit refresh thread on window dispose
                     Thread.currentThread().interrupt();
                     break;

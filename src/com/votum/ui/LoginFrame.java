@@ -652,6 +652,7 @@ public final class LoginFrame extends JFrame {
         try {
             on = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
         } catch (Exception e) {
+            java.util.Objects.requireNonNull(e);
             // Some platforms or headless environments do not support caps lock state detection
             on = false;
         }

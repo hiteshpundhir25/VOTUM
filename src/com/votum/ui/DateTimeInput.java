@@ -128,6 +128,7 @@ public final class DateTimeInput extends JTextField {
         try {
             return LocalDateTime.parse(text.trim(), FORMATTER);
         } catch (DateTimeParseException e) {
+            java.util.Objects.requireNonNull(e);
             // Unparseable format; return null so the validation logic can report a clear error
             return null;
         }

@@ -789,6 +789,7 @@ public final class FileManager {
         try {
             return ElectionStatus.valueOf(text.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
+            java.util.Objects.requireNonNull(e);
             // If the status in the file doesn't match DRAFT/OPEN/CLOSED, return null
             return null;
         }
@@ -801,10 +802,12 @@ public final class FileManager {
         try {
             return LocalDateTime.parse(text, DATE_TIME_FORMATTER);
         } catch (DateTimeParseException e) {
+            java.util.Objects.requireNonNull(e);
             // Fallback: Try standard LocalDateTime.parse for ISO formats
             try {
                 return LocalDateTime.parse(text);
             } catch (Exception ex) {
+                java.util.Objects.requireNonNull(ex);
                 return null;
             }
         }
