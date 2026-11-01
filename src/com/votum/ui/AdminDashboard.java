@@ -34,16 +34,25 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Editorial Grid Administrator Control Center for VOTUM.
- *
- * Provides a unified, professional dashboard for:
- *  - Real-time campus election metrics and clock-aware status monitoring
- *  - Actionable attention alerts for elections requiring administrative configuration
- *  - Safe election creation (DRAFT), verified voting window management, and cascade deletion
- *  - Election-scoped candidate rosters with instant multi-column search
- *  - Official voter roll management with privacy-safe credential handling
- *  - Live vote distribution tallies and official results certification
- *  - Chronological append-only system audit log verification and maintenance
+ * ============================================================================
+ * AdminDashboard (Administrator & Election Officer Control Center)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. CARDLAYOUT TAB MANAGEMENT:
+ *     - Uses java.awt.CardLayout to switch seamlessly between 6 panels:
+ *       (1) Dashboard Overview, (2) Election Manager, (3) Candidate Manager,
+ *       (4) Voter Roll Manager, (5) Results & Certified Tally, (6) Audit Trail.
+ *  2. CANDIDATE & VOTER MANAGEMENT:
+ *     - Candidate: Register new candidate, modify candidate details, remove candidate.
+ *     - Voter: Register student, toggle eligibility (eligible <-> ineligible), delete record.
+ *  3. MULTITHREADING (SwingWorker / Background Thread):
+ *     - Runs a background daemon thread that polls election statistics every 3 seconds 
+ *       and refreshes UI metrics safely via SwingUtilities.invokeLater.
+ *  4. DATA SYNCHRONIZATION:
+ *     - Automatically refreshes tables and forms whenever an action completes.
  */
 public final class AdminDashboard extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -2043,9 +2052,8 @@ public final class AdminDashboard extends JFrame {
             String suffix = id.substring(prefix.length()).trim();
             try {
                 highest = Math.max(highest, Integer.parseInt(suffix));
-            } catch (NumberFormatException ignored) {
-                assert ignored != null;
-                /* non-numeric suffix */
+            } catch (NumberFormatException e) {
+                // Skip non-numeric suffix (e.g. custom IDs) when auto-incrementing
             }
         }
         return String.format(Locale.ROOT, "%s%03d", prefix, highest + 1);
@@ -3055,7 +3063,7 @@ public final class AdminDashboard extends JFrame {
                         }
                     });
                 } catch (InterruptedException ex) {
-                    assert ex != null;
+                    // Restore interrupt status and exit refresh thread on window dispose
                     Thread.currentThread().interrupt();
                     break;
                 }

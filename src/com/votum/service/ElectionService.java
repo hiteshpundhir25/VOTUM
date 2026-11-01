@@ -10,8 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages the creation, scheduling, candidate registration, voter registration,
- * and state transitions of elections.
+ * ============================================================================
+ * ElectionService (Election Lifecycle & Roll Management)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. BUSINESS VALIDATION:
+ *     - Ensures election names and IDs are non-blank and unique.
+ *     - Verifies that endTime is strictly after startTime.
+ *     - Enforces that voter usernames cannot collide with administrator usernames.
+ *  2. LIFECYCLE MANAGEMENT:
+ *     - Transitions elections through status states: DRAFT -> OPEN -> CLOSED.
+ *  3. CASCADING DELETION & INTEGRITY:
+ *     - Deleting an election cascades down to remove all registered candidates,
+ *       purge all associated votes, and reset voter status flags.
+ *  4. AUDIT COMPLIANCE:
+ *     - Logs all administrative actions (creation, opening, closing, candidate registration,
+ *       eligibility toggles, voter deletion) into data/audit.log.
  */
 public class ElectionService {
     private final FileManager fileManager;

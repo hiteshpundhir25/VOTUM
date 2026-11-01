@@ -31,16 +31,24 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * The student's ballot paper.
- *
- * <p>Laid out like a special election issue: the lead story names the election,
- * the deck explains it in serif body text, and the candidate profiles run down
- * the page in numbered columns. The right-hand sidebar is the ballot itself —
- * status, guidance, the submit action and the receipt all stay in one place.</p>
- *
- * <p>The election business rules live in {@link VotingService}; this screen only
- * presents them. The single gate is {@link #canVote()}: eligible, not already
- * voted in this election, and the clock inside the voting window.</p>
+ * ============================================================================
+ * VoterDashboard (Student Voting Portal & Digital Ballot)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. SECURE STUDENT VOTING:
+ *     - Displays the currently active election and lists all contesting candidates.
+ *     - Uses a ButtonGroup to ensure only ONE candidate can be selected at a time.
+ *  2. SINGLE-VOTE ENFORCEMENT & RECEIPT GENERATION:
+ *     - Once the student clicks "Submit Official Vote", VotingService validates eligibility,
+ *       ensures the student has not already voted, records the vote in votes.txt, and 
+ *       marks the voter as having voted.
+ *     - Immediately locks the ballot inputs and displays a certified digital receipt.
+ *  3. KIOSK FULL-SCREEN MODE:
+ *     - Always-on-top, undecorated, maximized window prevents students from accidentally 
+ *       closing or leaving an active ballot unattended.
  */
 public final class VoterDashboard extends JFrame {
     private static final long serialVersionUID = 1L;

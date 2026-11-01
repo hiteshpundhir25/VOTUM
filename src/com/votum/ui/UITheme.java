@@ -159,8 +159,8 @@ public final class UITheme {
             for (String family : GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()) {
                 installed.add(family.toLowerCase(Locale.ROOT));
             }
-        } catch (Throwable headlessOrRestricted) {
-            assert headlessOrRestricted != null;
+        } catch (Throwable e) {
+            // Headless server or restricted permissions: return the standard fallback font
             return logicalFallback;
         }
         for (String candidate : candidates) {
@@ -199,9 +199,8 @@ public final class UITheme {
                 if (Boolean.TRUE.equals(platformSetting)) {
                     enabled = false;
                 }
-            } catch (Throwable ignored) {
-                assert ignored != null;
-                // Desktop properties are optional; keep the default.
+            } catch (Throwable e) {
+                // Desktop properties are optional; keep default if not supported
             }
 
             motionEnabled = enabled;
@@ -1121,8 +1120,8 @@ public final class UITheme {
                 from = Double.parseDouble(current.group(1));
                 to = Double.parseDouble(target.group(1));
                 decimals = decimalPlaces(target.group(1));
-            } catch (NumberFormatException malformed) {
-                assert malformed != null;
+            } catch (NumberFormatException e) {
+                // If value cannot be parsed numerically, show text as-is
                 valueLabel.setText(next);
                 return;
             }

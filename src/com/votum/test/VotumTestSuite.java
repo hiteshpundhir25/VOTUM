@@ -949,7 +949,7 @@ public class VotumTestSuite {
             try {
                 ctx.votingService.castVote("V001", "E001", "C001");
             } catch (com.votum.exception.VotumException expected) {
-                assert expected != null;
+                // Expected: Ineligible voter must be blocked from voting
                 voteRejected = true;
             }
 
@@ -1050,7 +1050,7 @@ public class VotumTestSuite {
             try {
                 ctx.electionService.updateCandidate("C888", "", "Aero", "E001", "Slogan");
             } catch (InvalidElectionException expected) {
-                assert expected != null;
+                // Expected: Validation must reject blank candidate name
                 blankNameRejected = true;
             }
 

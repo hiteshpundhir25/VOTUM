@@ -7,20 +7,41 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Encapsulates the calculated outcome of an election.
- * Stores vote tallies, turnout metrics, winner(s), and tie state.
+ * ============================================================================
+ * ElectionResult (Calculated Election Outcome Model)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. ENCAPSULATION & DATA TRANSFER OBJECT (DTO):
+ *     Bundles all statistics for an election (vote counts, total votes, turnout %, 
+ *     winner list, tie flag) into a single clean object.
+ *  2. COLLECTIONS FRAMEWORK:
+ *     - LinkedHashMap: Preserves candidate insertion order for predictable display.
+ *     - Collections.unmodifiableMap / Collections.unmodifiableList: Returns read-only 
+ *       views so external callers cannot mutate internal election tallies.
+ *  3. SUMMARY GENERATOR:
+ *     - getWinnerSummary(): Evaluates counts and produces a friendly string:
+ *       "No votes recorded yet", "Winner: <name> (X votes)", or "TIE between: <name>, <name>".
  */
 public class ElectionResult {
+
+    // --- Private Attributes ---
     private String electionId;
     private String electionName;
-    private Map<String, Integer> candidateVoteCounts;
-    private Map<String, Candidate> candidateDetails;
-    private int totalVotes;
-    private int eligibleVotersCount;
-    private double turnoutPercentage;
-    private List<Candidate> winningCandidates;
-    private boolean isTie;
+    private Map<String, Integer> candidateVoteCounts;  // Map of candidateId -> vote count
+    private Map<String, Candidate> candidateDetails;   // Map of candidateId -> Candidate object
+    private int totalVotes;                           // Total ballots cast in this election
+    private int eligibleVotersCount;                   // Total eligible voters on the roll
+    private double turnoutPercentage;                 // Turnout percentage: (totalVotes / eligible) * 100
+    private List<Candidate> winningCandidates;        // List of candidate(s) with highest vote count
+    private boolean isTie;                            // True if two or more candidates tied for first place
 
+    /**
+     * Parameterized Constructor.
+     * Initializes all collection structures to prevent NullPointerExceptions.
+     */
     public ElectionResult(String electionId, String electionName) {
         this.electionId = electionId;
         this.electionName = electionName;
@@ -33,6 +54,8 @@ public class ElectionResult {
         this.isTie = false;
     }
 
+    // --- Getters and Setters ---
+
     public String getElectionId() {
         return electionId;
     }
@@ -41,10 +64,18 @@ public class ElectionResult {
         return electionName;
     }
 
+    /**
+     * Returns an unmodifiable map of candidate vote counts.
+     * Protects internal data structure from outside tampering.
+     */
     public Map<String, Integer> getCandidateVoteCounts() {
         return Collections.unmodifiableMap(candidateVoteCounts);
     }
 
+    /**
+     * Adds or updates a candidate tally.
+     * Ensures negative votes are clamped to zero.
+     */
     public void addCandidateTally(Candidate candidate, int votes) {
         if (candidate == null || candidate.getCandidateId() == null) {
             return;
@@ -88,6 +119,9 @@ public class ElectionResult {
         this.turnoutPercentage = turnoutPercentage;
     }
 
+    /**
+     * Returns an unmodifiable list of winning candidates.
+     */
     public List<Candidate> getWinningCandidates() {
         return Collections.unmodifiableList(winningCandidates);
     }
@@ -106,6 +140,10 @@ public class ElectionResult {
         isTie = tie;
     }
 
+    /**
+     * Generates a clear, readable text summary of the election outcome.
+     * Used by ResultDialog and results banner in AdminDashboard.
+     */
     public String getWinnerSummary() {
         if (totalVotes == 0) {
             return "No votes recorded yet.";
@@ -129,3 +167,4 @@ public class ElectionResult {
         return "No winner determined.";
     }
 }
+

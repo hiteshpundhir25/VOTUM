@@ -1,8 +1,14 @@
 package com.votum.exception;
 
 /**
- * Thrown when selecting a candidate that is null, unregistered,
- * or does not belong to the target election.
+ * ============================================================================
+ * InvalidCandidateException
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Thrown when selecting a candidate that is unregistered, null, or does not 
+ * belong to the contested election.
  */
 public class InvalidCandidateException extends VotumException {
     private static final long serialVersionUID = 1L;
@@ -11,3 +17,4 @@ public class InvalidCandidateException extends VotumException {
         super(message);
     }
 }
+

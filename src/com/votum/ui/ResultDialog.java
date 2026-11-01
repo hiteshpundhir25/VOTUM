@@ -15,12 +15,20 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * The certified results page.
- *
- * <p>Structured like the results spread of a newspaper: a kicker, the election
- * name, a heavy rule, the winner's name as the headline, then the numbers and
- * the vote distribution. The dialog keeps its keyboard contract: Enter closes,
- * Escape closes, and the close button is the default button.</p>
+ * ============================================================================
+ * ResultDialog (Official Certified Results Dialog)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. MODAL DIALOG (javax.swing.JDialog):
+ *     - Displays a modal popup (blocks interaction with parent window until dismissed).
+ *  2. RESULTS VISUALIZATION:
+ *     - Displays winner declaration, turnout rate, total votes, and horizontal bars 
+ *       showing vote distribution across candidates.
+ *  3. KEYBOARD ACCESSIBILITY:
+ *     - Escape key or Enter key smoothly closes the dialog.
  */
 public final class ResultDialog extends JDialog {
     private static final long serialVersionUID = 1L;

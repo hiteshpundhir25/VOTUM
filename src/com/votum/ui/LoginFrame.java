@@ -31,18 +31,25 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * The VOTUM front page and authentication portal.
- *
- * <p>
- * Designed with an authoritative broadsheet editorial aesthetic: an
- * edge-to-edge
- * institutional masthead across the top, a double rule border, a left-hand
- * civic
- * integrity exhibit featuring an animated geometric electoral compass, security
- * pillars,
- * and an aligned credential authentication terminal with quick-fill profile
- * cards.
- * </p>
+ * ============================================================================
+ * LoginFrame (Front-Door Authentication & Role Redirection)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. SWING GUI LAYOUT & KIOSK FULL-SCREEN:
+ *     - Extends javax.swing.JFrame.
+ *     - Configured in kiosk mode (undecorated, maximized, always-on-top) for election security.
+ *  2. ROLE-BASED DISPATCH (POLYMORPHISM):
+ *     - Passes user input to AuthenticationService.login(username, password).
+ *     - If the returned User is an Admin -> launches AdminDashboard.
+ *     - If the returned User is a Voter -> launches VoterDashboard.
+ *  3. CONVENIENCE QUICK-FILLS:
+ *     - Provides one-click buttons for demo accounts (Admin, Voter 1-4, Ineligible Voter 5).
+ *  4. ACCESSIBILITY & SHORTCUTS:
+ *     - Enter key activates Sign In (default button).
+ *     - Escape key opens a clean confirmation dialog to exit.
  */
 public final class LoginFrame extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -644,8 +651,8 @@ public final class LoginFrame extends JFrame {
         boolean on = false;
         try {
             on = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
-        } catch (Exception ignored) {
-            assert ignored != null;
+        } catch (Exception e) {
+            // Some platforms or headless environments do not support caps lock state detection
             on = false;
         }
         capsLockLabel.setText(on ? "\u26A0  Caps Lock is on" : " ");

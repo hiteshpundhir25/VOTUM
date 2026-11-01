@@ -12,9 +12,25 @@ import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
- * Manages file-based storage for all Votum entities.
- * Uses human-readable delimiter-separated text files (CSV/Pipe format).
- * Automatically initializes demo data if files do not exist.
+ * ============================================================================
+ * FileManager (Text File Persistence Layer)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. FILE HANDLING & STREAM I/O:
+ *     - Uses BufferedReader / FileReader to read line-by-line without high memory overhead.
+ *     - Uses BufferedWriter / FileWriter to write records safely to disk.
+ *     - Uses try-with-resources to ensure file handles are automatically closed even on errors.
+ *  2. DELIMITER-SEPARATED VALUES (CSV-Style):
+ *     - Records are stored as semicolon-separated lines (e.g. ID;Name;Department;...).
+ *     - Uses String.split(";") with edge-case handling for blank trailing columns.
+ *  3. DATA INTEGRITY & CASCADE CLEANUP:
+ *     - When an election is deleted, cascading logic purges its candidates and votes.
+ *     - When a candidate or voter is removed, their associated cast ballots are safely purged.
+ *  4. SEEDING / DEMO RESTORATION:
+ *     - Automatically generates default demo files if the directory is clean.
  */
 public final class FileManager {
     private static final String DELIMITER = ";";
@@ -109,9 +125,8 @@ public final class FileManager {
         if (!vtFile.exists()) {
             try {
                 vtFile.createNewFile();
-            } catch (IOException ignored) {
-                assert ignored != null;
-                /* ignore */
+            } catch (IOException e) {
+                System.err.println("Note: Could not pre-create empty votes file: " + e.getMessage());
             }
         }
     }
@@ -774,7 +789,7 @@ public final class FileManager {
         try {
             return ElectionStatus.valueOf(text.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
-            assert e != null;
+            // If the status in the file doesn't match DRAFT/OPEN/CLOSED, return null
             return null;
         }
     }
@@ -786,11 +801,10 @@ public final class FileManager {
         try {
             return LocalDateTime.parse(text, DATE_TIME_FORMATTER);
         } catch (DateTimeParseException e) {
-            assert e != null;
+            // Fallback: Try standard LocalDateTime.parse for ISO formats
             try {
                 return LocalDateTime.parse(text);
-            } catch (Exception ignored) {
-                assert ignored != null;
+            } catch (Exception ex) {
                 return null;
             }
         }

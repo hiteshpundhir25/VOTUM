@@ -12,9 +12,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages the text-based audit trail for Votum.
- * Appends every critical election action to data/audit.log with a timestamp.
- * Supports filtering and clearing logs when an election is deleted.
+ * ============================================================================
+ * AuditLogger (Tamper-Evident System Audit Trail)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. APPEND-ONLY FILE WRITING:
+ *     - Uses 'new FileWriter(logFilePath, true)' with append mode enabled.
+ *     - Every election event is timestamped and written to data/audit.log.
+ *  2. THREAD SAFETY (CONCURRENCY):
+ *     - Uses 'synchronized' methods to ensure that multiple simultaneous events 
+ *       (e.g., voters submitting ballots at the exact same millisecond) do not 
+ *       interleave or corrupt log lines.
+ *  3. AUDIT PURGING & MAINTENANCE:
+ *     - Provides removeLogsForElection() to cleanly wipe logs of a deleted election.
+ *     - Provides clearAllLogs() for administrative cleanup.
  */
 public class AuditLogger {
     private static final String DEFAULT_LOG_PATH = "data/audit.log";

@@ -7,8 +7,23 @@ import com.votum.storage.FileManager;
 import java.util.*;
 
 /**
- * Computes official election results, vote tallies, turnout percentages,
- * winner determination, and tie detection.
+ * ============================================================================
+ * ResultService (Tally, Turnout & Winner Determination Engine)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Demonstrates:
+ *  1. DATA PROCESSING WITH COLLECTIONS:
+ *     - Iterates through the list of cast votes and tallies them per candidate.
+ *     - Calculates student voter turnout percentage: (totalVotes / eligibleVoters) * 100.
+ *  2. TIE DETECTION ALGORITHM:
+ *     - Finds the highest vote count among contesting candidates.
+ *     - Detects if two or more candidates have the same top score and marks isTie = true.
+ *  3. AUDIT SEPARATION:
+ *     - calculateResult(): Generates official results AND records an audit log entry.
+ *     - previewResult(): Generates the exact same metrics WITHOUT writing to audit.log,
+ *       preventing live dashboard auto-refresh timers from spamming the log file.
  */
 public class ResultService {
     private final FileManager fileManager;

@@ -1,7 +1,14 @@
 package com.votum.exception;
 
 /**
- * Thrown when user authentication fails due to bad credentials or unknown user.
+ * ============================================================================
+ * InvalidLoginException
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * Thrown by AuthenticationService when login credentials fail verification 
+ * (e.g. wrong password, non-existent username, or blank inputs).
  */
 public class InvalidLoginException extends VotumException {
     private static final long serialVersionUID = 1L;
@@ -10,3 +17,4 @@ public class InvalidLoginException extends VotumException {
         super(message);
     }
 }
+

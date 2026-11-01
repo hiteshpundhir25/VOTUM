@@ -10,16 +10,25 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Handles the casting and validation of votes.
- * Strictly enforces all 8 election business rules:
- *  - Rule 1: Only registered & eligible voters can vote.
- *  - Rule 2: Single vote per voter (Duplicate voting blocked).
- *  - Rule 3: Election must be OPEN.
- *  - Rule 4: Voting before start time rejected.
- *  - Rule 5: Voting after end time rejected.
- *  - Rule 6: Candidate must exist and belong to target election.
- *  - Rule 7: Admin-only management (handled by access controls).
- *  - Rule 8: Closed elections cannot accept votes.
+ * ============================================================================
+ * VotingService (Ballot Casting & Democratic Rules Engine)
+ * ============================================================================
+ * 
+ * Course: CSC2104 - Object Oriented Programming (Java)
+ * 
+ * This service is the core of VOTUM's business logic.
+ * It strictly enforces all 8 democratic election rules:
+ *  - Rule 1: Registration & Eligibility (Only registered, eligible voters can cast ballots).
+ *  - Rule 2: Single-Vote Rule (Duplicate voting is blocked; one student, one vote).
+ *  - Rule 3: Election Status (Must be OPEN, not DRAFT or CLOSED).
+ *  - Rule 4: Start Window Check (Voting before start time is rejected with ElectionClosedException).
+ *  - Rule 5: End Window Check (Voting after end time is rejected with ElectionClosedException).
+ *  - Rule 6: Candidate Belonging (Selected candidate must belong to the contested election).
+ *  - Rule 7: Admin Privileges (Handled by role-based access).
+ *  - Rule 8: Closed Election Defense (Closed elections permanently reject new ballots).
+ * 
+ * Notice: Synchronization ('synchronized' keyword) is used on castVoteAt to prevent
+ * race conditions where two simultaneous requests from the same user could slip through.
  */
 public class VotingService {
     private final FileManager fileManager;
